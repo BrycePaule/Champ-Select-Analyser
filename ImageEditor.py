@@ -306,6 +306,14 @@ icon_scales = {
 
 class ImageEditor():
 
+    """
+    Contains all methods to correct differences between broadcast graphics
+    and default splash arts / icons.
+
+    Includes cropping, tilting, enhancing, darkening, covering secondary champ
+    portraits, mirroring, etc.
+    """
+
     def __init__(self):
         self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Splashes_Raw/'
         self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Icons_Raw/'
