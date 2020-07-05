@@ -5,8 +5,28 @@ import sys
 from Downloader import Downloader
 from ImageEditor import ImageEditor
 
+from TemplateMatcher import TemplateMatcher
+from GoogleDriveInterface import GoogleDriveInterface
+from ImageCropper import ImageCropper
 
-def run(download=False):
+
+""" TIMERS """
+def start_timer():
+    return time.perf_counter()
+
+
+def end_timer(time_start):
+    time_stop = time.perf_counter()
+    elapsed_time = str(datetime.timedelta(seconds=time_stop - time_start, ))
+
+    print('\n-----------------------')
+    print(f'Runtime: {elapsed_time}')
+    print('-----------------------')
+
+
+""" CHAMP SELECT ANALYSER"""
+
+def run_scrape_and_scale(download=False):
     time_start = time.perf_counter()
 
     if download:
@@ -30,25 +50,18 @@ def run(download=False):
     end_timer(time_start)
 
 
-def start_timer():
-    return time.perf_counter()
-
-
-def end_timer(time_start):
-    time_stop = time.perf_counter()
-    elapsed_time = str(datetime.timedelta(seconds=time_stop - time_start, ))
-
-    print('\n-----------------------')
-    print(f'Runtime: {elapsed_time}')
-    print('-----------------------')
+def run_crop_and_match():
+    matcher = TemplateMatcher()
+    GDI = GoogleDriveInterface()
+    cropper = ImageCropper()
 
 
 if __name__ == '__main__':
 
     if len(sys.argv) > 1:
         if sys.argv[1] == '-d':
-            run(download=True)
+            run_scrape_and_scale(download=True)
     else:
-        run()
+        run_scrape_and_scale()
 
 

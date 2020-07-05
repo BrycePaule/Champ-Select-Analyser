@@ -323,9 +323,11 @@ class ImageEditor():
         self.champlist = self.import_champlist()
 
 
-    """ IMAGE MANIPULATING """
+    """ IMAGE EDITING """
 
     def splash_complete_fix(self, champ_name):
+        """ Runs all splash art image editing methods, saves results """
+
         splash = Image.open(self.splash_path + champ_name + '.bmp')
 
         splash = self.splash_face_cover(champ_name, splash)
@@ -338,6 +340,8 @@ class ImageEditor():
 
 
     def icon_complete_fix(self, champ_name):
+        """ Runs all icon image editing methods, saves results """
+
         icon = Image.open(self.icon_path + champ_name + '.bmp')
         icon = self.icon_manual_override(champ_name, icon)
         icon = self.icon_scale(champ_name, icon)
@@ -1099,6 +1103,9 @@ class ImageEditor():
         return icon
 
 
+    """ CHAMPLIST """
+
     def import_champlist(self):
+        """ Imports locally stored champlist """
         with open(self.champlist_path, 'r') as f:
             return [name.strip() for name in f]
