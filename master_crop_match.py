@@ -445,16 +445,24 @@ def createResizedCopies(list_of_crops, number_of_copies, w, h, cropPath):
             resize_factor += resize_factor_fixed
 
 
+def start_timer():
+    return time.perf_counter()
+
+
+def end_timer(time_start):
+    time_stop = time.perf_counter()
+    elapsed_time = str(datetime.timedelta(seconds=time_stop - time_start, ))
+
+    print('\n-----------------------')
+    print(f'Runtime: {elapsed_time}')
+    print('-----------------------')
+
+
 def main():
 
 
     # ----------------------------------------------------------------------------------
     # MAIN
-
-    time_start = time.perf_counter()
-
-
-
 
 
 
@@ -498,6 +506,8 @@ def main():
         google_sheet_name = input('Please enter sheet URL: ')
         worksheet_name = input('Please enter worksheet name: ')
 
+    time_start = start_timer()
+
     print(google_sheet_name)
     print(worksheet_name)
 
@@ -538,6 +548,8 @@ def main():
         printResultsToConsole(bans_results)
         print(' ------------ Picks ------------ ' )
         printResultsToConsole(picks_results)
+
+        end_timer(time_start)
 
         if google_sheet_name != '':
             print('Sending results to Google Sheet ... ')

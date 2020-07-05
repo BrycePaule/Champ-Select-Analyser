@@ -6,7 +6,7 @@ from PIL import Image
 class TemplateCropper():
 
 
-    def __init__(self):
+    def __init__(self, template_duplicate_count):
         self.champ_select_path = 'D:/Scripts/Python/ChampSelectAnalyser/ChampSelectScreenshots/'
         self.template_path = 'D:/Scripts/Python/ChampSelectAnalyser/Templates/'
         self.results_path = 'D:/Scripts/Python/ChampSelectAnalyser/Results/'
@@ -18,7 +18,8 @@ class TemplateCropper():
 
         self.pick_coords = self.get_pick_coordinates()
         self.ban_coords = self.get_ban_coordinates()
-        self.duplicate_count = 3
+        self.duplicate_count = template_duplicate_count
+
 
     """ TEMPLATE CREATION """
 
@@ -32,10 +33,10 @@ class TemplateCropper():
 
         self.clear_templates()
 
-        self.check_crop_coordinate_accuracy(self.ban_coords, bans=True)
-        self.check_crop_coordinate_accuracy(self.pick_coords)
+        self.check_crop_coordinates(self.ban_coords, bans=True)
+        self.check_crop_coordinates(self.pick_coords)
 
-        for champ_select in self.get_champ_select_image(all=False):
+        for champ_select in self.get_champ_select_image(all_templates=False):
             print('Cropper working on: ' + champ_select)
 
             image = Image.open(f'{self.champ_select_path}{champ_select}')
@@ -99,13 +100,13 @@ class TemplateCropper():
                 resize_factor += resize_factor_fixed
 
 
-    def get_champ_select_image(self, all=False):
+    def get_champ_select_image(self, all_templates=False):
         """
         Returns the latest champ select screenshot, or a list of all
         screenshots in the directory if all=True
         """
 
-        if all:
+        if all_templates:
             return (f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp"))
         else:
             return [[f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")][-1]]
@@ -124,7 +125,8 @@ class TemplateCropper():
 
     """ CROP COORDINATES """
 
-    def get_ban_coordinates(self):
+    @staticmethod
+    def get_ban_coordinates():
         """
          Generates lists of ban coordinates.
 
@@ -147,7 +149,8 @@ class TemplateCropper():
         return [bb1, bb2, bb3, bb4, bb5, rb1, rb2, rb3, rb4, rb5]
 
 
-    def get_pick_coordinates(self):
+    @staticmethod
+    def get_pick_coordinates():
         """
          Generates lists of pick coordinates.
 
@@ -170,7 +173,7 @@ class TemplateCropper():
         return [b1, b2, b3, b4, b5, r1, r2, r3, r4, r5]
 
 
-    def check_crop_coordinate_accuracy(self, slot_coords_list, bans=False):
+    def check_crop_coordinates(self, slot_coords_list, bans=False):
         """ Returns the width and height of given selection of templates """
 
         self.check_edge_size_consistency(slot_coords_list)
@@ -187,7 +190,8 @@ class TemplateCropper():
             self.pick_height = height
 
 
-    def check_edge_size_consistency(self, slot_coords_list):
+    @staticmethod
+    def check_edge_size_consistency(slot_coords_list):
         """
         Runs through all templates coordinates, checking that they're of
         uniform size.
