@@ -23,8 +23,8 @@ class Downloader():
     def __init__(self):
         self.IEdit = ImageEditor()
 
-        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Splashes_Raw/'
-        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Icons_Raw/'
+        self.splash_path = '/Assets/Splashes_Raw/'
+        self.icon_path = '/Assets/Icons_Raw/'
 
         self.champlist_filename = 'champlist.txt'
 

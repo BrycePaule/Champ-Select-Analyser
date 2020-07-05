@@ -2,16 +2,23 @@ import os
 import numpy as np
 import cv2 as cv
 
-from pathlib import Path
-
 
 class TemplateMatcher():
 
 
     def __init__(self):
-        self.template_path = None
-        self.champlist_path = None
-        self.results_path = 'D:/Scripts/Python/Champ_Select_Analyser/ImageMatcher/Results/'
+        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes'
+        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons'
+
+        self.champlist_path = 'D:/Scripts/Python/ChampSelectAnalyser/champlist.txt/'
+        self.champ_select_path = 'D:/Scripts/Python/ChampSelectAnalyser/ChampSelectScreenshots/'
+        self.template_path = 'D:/Scripts/Python/ChampSelectAnalyser/Templates/'
+        self.results_path = 'D:/Scripts/Python/ChampSelectAnalyser/Results/'
+
+        self.accuracy_filepath_splash = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_splash.txt/'
+        self.accuracy_filepath_icons = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_icons.txt/'
+
+        self.champlist = self.importChamplist()
 
 
     def removePreviousResults(self):
@@ -22,25 +29,12 @@ class TemplateMatcher():
             os.remove(os.path.join(self.results_path, f))
 
 
-    def saveToMatcher(self, bool):
-        if (bool):
-            cropPath = Path(
-                "D:/Scripts/Python/Champ_Select_Analyser/ImageMatcher/Templates/")
-        else:
-            cropPath = Path(
-                "D:/Scripts/Python/Champ_Select_Analyser/ImageCropper/temp_images/")
-
-        return cropPath
-
-
     def organiseTemplates(self, number_of_copies):
         all_templates_unorganized = os.listdir(self.template_path)
-        total_for_each_slot = (
-                    (number_of_copies * 2) + 1)  # 3 sml, 3 big + original
+        total_for_each_slot = ((number_of_copies * 2) + 1)  # 3 sml, 3 big + original
 
         # sort picks from entire template list, shape into numpy array
-        pick_names = ['b1', 'b2', 'b3', 'b4', 'b5', 'r1', 'r2', 'r3', 'r4',
-                      'r5']
+        pick_names = ['b1', 'b2', 'b3', 'b4', 'b5', 'r1', 'r2', 'r3', 'r4', 'r5']
         picks = [template for template in all_templates_unorganized if
                  template[0:2] in pick_names]
 
@@ -48,8 +42,7 @@ class TemplateMatcher():
         picks.shape = 10, total_for_each_slot
 
         # sort bans from entire template list, shape into numpy array
-        ban_names = ['bb1', 'bb2', 'bb3', 'bb4', 'bb5', 'rb1', 'rb2', 'rb3',
-                     'rb4', 'rb5']
+        ban_names = ['bb1', 'bb2', 'bb3', 'bb4', 'bb5', 'rb1', 'rb2', 'rb3', 'rb4', 'rb5']
         bans = [template for template in all_templates_unorganized if
                 template[0:3] in ban_names]
 
@@ -74,12 +67,11 @@ class TemplateMatcher():
 
         for i in range(10 * number_of_copies):
             # math for iterating through the numpy array of templates
-            if (column == number_of_copies):
+            if column == number_of_copies:
                 column = 0
                 row += 1
                 if not flag:
-                    search_results.append(
-                        current_template + ' - ' + '___' + ' - ' + '___')
+                    search_results.append(current_template + ' - ' + '___' + ' - ' + '___')
 
             # when hitting the end of the last row, end
             if (row >= 10):
@@ -88,8 +80,7 @@ class TemplateMatcher():
             flag = False
 
             current_template = templates_array[row][column]
-            template = cv.imread(
-                str(Path.joinpath(template_path, current_template)), 0)
+            template = cv.imread(f'{self.template_path}{current_template}', 0)
 
             matches = 0
 
@@ -120,29 +111,20 @@ class TemplateMatcher():
                         _, max_val, _, max_loc = cv.minMaxLoc(res)
                         top_left = max_loc
                         bottom_right = (top_left[0] + w, top_left[1] + h)
-                        cv.rectangle(compare_image, top_left, bottom_right,
-                                     (255, 255, 255), 5)
+                        cv.rectangle(compare_image, top_left, bottom_right, (255, 255, 255), 5)
 
                     if (flag):
-                        current_template2 = current_template.replace('.bmp',
-                                                                     '')
+                        print('                                        Found ' + str(matches) + ' matches: -- ' + name)
+                        search_results.append(current_template + ' - ' + name + ' - ' + str(matches))
 
-                        print(
-                            '                                        Found ' + str(
-                                matches) + ' matches: -- ' + name)
-                        # cv.imwrite('Results/'+ current_template2 + '_' + name + '.bmp', compare_image)
-                        search_results.append(
-                            current_template + ' - ' + name + ' - ' + str(
-                                matches))
-
-                        if type == 'bans':
-                            updateAccuracy(name, matches, 'accuracy_icons.txt')
-                        else:
-                            updateAccuracy(name, matches, 'accuracy.txt')
+                        # TODO NEEDS FIXING ---------------------------
+                        # if type == 'bans':
+                        #     self.updateAccuracy(name, matches, icons=True)
+                        # else:
+                        #     self.updateAccuracy(name, matches)
 
                         column = -1
                         row += 1
-                        # time.sleep(0.2)
                         break
 
             column += 1
@@ -187,50 +169,8 @@ class TemplateMatcher():
         print()
 
 
-    """ ACCURACY """
-
-    def updateAccuracy(self, name, num_matches, filename):
-        overall_match_accuracy = []
-        with open(
-                'D:/Scripts/Python/Champ_Select_Analyser/ImageMatcher/' + filename,
-                'r') as f:
-            for line in f:
-                champname, acc = line.split('-')
-                champname = champname.strip()
-                acc = acc.strip()
-                overall_match_accuracy.append(champname)
-                overall_match_accuracy.append(acc)
-
-        index = overall_match_accuracy.index(name)
-        overall_match_accuracy[index + 1] = num_matches
-
-        with open(
-                'D:/Scripts/Python/Champ_Select_Analyser/ImageMatcher/' + filename,
-                'w') as f:
-            counter = 0
-            for match in overall_match_accuracy:
-
-                if ((counter % 2) == 0):
-                    champname = match
-                else:
-                    champ_matches = match
-                    f.write(champname + ' - ' + str(champ_matches) + '\n')
-
-                counter += 1
-
-
-    def createDefaultAccuracyFile(self, filename, champlist):
-        with open(
-                'D:/Scripts/Python/Champ_Select_Analyser/ImageMatcher/' + filename,
-                'w') as f:
-            for name in champlist:
-                f.write(name + ' - ' + '0 \n')
-
-
-    def printUnknownAccuracy(self, filename):
-        with open(
-                'D:/Scripts/Python/Champ_Select_Analyser/ImageMatcher/' + filename,
-                'r') as f:
+    def printUnknownAccuracy(self):
+        with open(self.accuracy_filepath_splash, 'r') as f:
             counter = 0
 
             print()
@@ -250,10 +190,8 @@ class TemplateMatcher():
             print('Total: ' + str(counter) + ' unkown champs')
 
 
-    def printLowAccuracy(self, filename):
-        with open(
-                'D:/Scripts/Python/Champ_Select_Analyser/ImageMatcher/' + filename,
-                'r') as f:
+    def printLowAccuracy(self):
+        with open(self.accuracy_filepath_splash, 'r') as f:
             counter = 0
 
             print()
@@ -272,6 +210,47 @@ class TemplateMatcher():
             print()
             print(
                 'Total: ' + str(counter) + ' low accuracy champs')
+
+
+    """ ACCURACY """
+
+    def updateAccuracy(self, name, num_matches):
+        # TODO: NEEDS FIXING --------------------------------------------------------------
+        overall_match_accuracy = []
+
+        with open(self.accuracy_filepath_splash, 'r') as f:
+            for line in f:
+                champname, acc = line.split('-')
+                champname = champname.strip()
+                acc = acc.strip()
+                overall_match_accuracy.append(champname)
+                overall_match_accuracy.append(acc)
+
+        index = overall_match_accuracy.index(name)
+        overall_match_accuracy[index + 1] = num_matches
+
+        with open(self.accuracy_filepath_splash, 'w') as f:
+            counter = 0
+            for match in overall_match_accuracy:
+
+                if (counter % 2) == 0:
+                    champname = match
+                else:
+                    champ_matches = match
+                    f.write(champname + ' - ' + str(champ_matches) + '\n')
+
+                counter += 1
+
+
+    def createDefaultAccuracyFile(self, icons=False):
+        if icons:
+            with open(self.accuracy_filepath_icons, 'w') as f:
+                for name in self.champlist:
+                    f.write(name + ' - ' + '0 \n')
+        else:
+            with open(self.accuracy_filepath_icons, 'w') as f:
+                for name in self.champlist:
+                    f.write(name + ' - ' + '0 \n')
 
 
     """ CHAMPLIST """

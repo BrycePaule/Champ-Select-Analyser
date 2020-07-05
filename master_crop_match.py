@@ -155,7 +155,7 @@ def template_match(champlist, templates_array, number_of_copies, image_filepath,
                     if type == 'bans':
                         updateAccuracy(name, matches, 'accuracy_icons.txt')
                     else:
-                        updateAccuracy(name, matches, 'accuracy.txt')
+                        updateAccuracy(name, matches, 'accuracy_splash.txt')
 
                     column = -1
                     row += 1
@@ -518,7 +518,7 @@ def main():
 
         print('                                ... making duplicates')
         icon_width_fixed, icon_height_fixed = findEdges(ban_coords)
-        splash_width_fixed, splash_height_fixed           = findEdges(pick_coords)
+        splash_width_fixed, splash_height_fixed = findEdges(pick_coords)
 
         createResizedCopies(ban_coords, number_of_copies, icon_width_fixed, icon_height_fixed, cropPath)
         createResizedCopies(pick_coords, number_of_copies, splash_width_fixed, splash_height_fixed, cropPath)
@@ -548,8 +548,8 @@ def main():
 
 
 
-    # printUnknownAccuracy('accuracy.txt')
-    # printLowAccuracy('accuracy.txt')
+    # printUnknownAccuracy('accuracy_splash.txt')
+    # printLowAccuracy('accuracy_splash.txt')
 
 
 

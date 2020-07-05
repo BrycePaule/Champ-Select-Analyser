@@ -7,17 +7,23 @@ class GoogleDriveInterface():
 
 
     def __init__(self):
-        self.credentials = 'CSA_secrets_GSuite.json'
+        self.credential_file = 'GoogleAuthentication/CSA_secrets_GSuite.json'
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+        self.creds = ServiceAccountCredentials.from_json_keyfile_name(self.credential_file, self.scope)
+
+        self.row_start = 23
+        self.col_start = 13
+
+        self.row_increment = 0
+        self.col_increment = 5
 
 
-    def outputToGoogleSheet(self, bans_results, picks_results, sheet_name, worksheet_name, row_start, col_start):
-        creds = ServiceAccountCredentials.from_json_keyfile_name(self.credentials, self.scope)
-        client = gspread.authorize(creds)
+    def outputToGoogleSheet(self, bans_results, picks_results, sheet_name, worksheet_name):
+        client = gspread.authorize(self.creds)
         sheet = client.open_by_url(sheet_name).worksheet(worksheet_name)
 
-        row = row_start
-        col = col_start
+        row = self.row_start
+        col = self.col_start
 
         sheet.update_cell(row, col, (bans_results[0].split(' - '))[1])
         sheet.update_cell(row + 1, col, (bans_results[1].split(' - '))[1])

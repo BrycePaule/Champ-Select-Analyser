@@ -315,9 +315,11 @@ class ImageEditor():
     """
 
     def __init__(self):
-        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Splashes_Raw/'
-        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Icons_Raw/'
-        self.manual_override_path = 'D:/Scripts/Python/ChampSelectAnalyser/Manual_Image_Overrides/'
+        self.splash_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes_Raw/'
+        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
+        self.icon_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons_Raw/'
+        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons_Raw/'
+        self.manual_override_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Manual_Image_Overrides/'
         self.champlist_path = 'D:/Scripts/Python/ChampSelectAnalyser/champlist.txt'
 
         self.champlist = self.import_champlist()
@@ -328,27 +330,28 @@ class ImageEditor():
     def splash_complete_fix(self, champ_name):
         """ Runs all splash art image editing methods, saves results """
 
-        splash = Image.open(self.splash_path + champ_name + '.bmp')
+        splash = Image.open(self.splash_raw_path + champ_name + '.bmp')
 
         splash = self.splash_face_cover(champ_name, splash)
         splash = self.splash_edit(champ_name, splash)
         splash = self.splash_scale(champ_name, splash)
 
-        splash.save('Splashes/' + champ_name + '.bmp')
+        splash.save(self.splash_path + champ_name + '.bmp')
         splash = ImageOps.mirror(splash)
-        splash.save('Splashes/' + champ_name + '_inverted.bmp')
+        splash.save(self.splash_path + champ_name + '_inverted.bmp')
 
 
     def icon_complete_fix(self, champ_name):
         """ Runs all icon image editing methods, saves results """
 
-        icon = Image.open(self.icon_path + champ_name + '.bmp')
+        icon = Image.open(self.icon_raw_path + champ_name + '.bmp')
+
         icon = self.icon_manual_override(champ_name, icon)
         icon = self.icon_scale(champ_name, icon)
 
-        icon.save('Icons/' + champ_name + '.bmp')
+        icon.save(self.icon_path + champ_name + '.bmp')
         icon = ImageOps.mirror(icon)
-        icon.save('Icons/' + champ_name + '_inverted.bmp')
+        icon.save(self.icon_path + champ_name + '_inverted.bmp')
 
 
     @staticmethod
