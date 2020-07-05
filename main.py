@@ -7,12 +7,12 @@ from Downloader import Downloader
 def run():
     DL = Downloader()
 
-    champlist_for_splash_download = DL.scrapeChamplist()
-    champlist = DL.fixAndExportChamplist(champlist_for_splash_download)
-    champlist_for_icon_download = DL.fixChamplistForIconDownload(champlist)
+    champlist_for_splash_download = DL.scrape_champlist_raw()
+    champlist = DL.get_champlist_for_saving(champlist_for_splash_download)
+    champlist_for_icon_download = DL.get_champlist_for_icon_download(champlist)
 
-    DL.scrapeSplashes(champlist_for_splash_download, True)
-    DL.scrapeIcons(champlist_for_icon_download, True)
+    DL.scrape_splashes(champlist_for_splash_download, True)
+    DL.scrape_icons(champlist_for_icon_download, True)
 
 
 if __name__ == '__main__':

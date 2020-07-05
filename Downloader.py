@@ -17,24 +17,30 @@ class Downloader():
         self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Splashes_Raw/'
         self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Icons_Raw/'
 
+        self.champlist_filename = 'champlist.txt'
+
+        self.champlist_url = 'https://na.leagueoflegends.com/en-us/champions/'
+        self.splash_url_prefix = 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/'
+        self.splash_url_suffix = '_0.jpg'
+        self.icon_url_prefix = 'https://lol.gamepedia.com/File:'
+        self.icon_url_suffix = 'Square.png'
+
 
     """ SCRAPING """
 
-    def scrapeChamplist(self):
-        print('Scraping champlist')
+    def scrape_champlist_raw(self):
+        """ Scrapes raw champlist from league of legends website. """
 
-        champs_url = 'https://na.leagueoflegends.com/en-us/champions/'
-
-        uClient = uReq(champs_url)
+        uClient = uReq(self.champlist_url)
         page_html = uClient.read()
         uClient.close()
 
         page = BeautifulSoup(page_html, 'html.parser')
         names = page.select('.style__Name-sc-12h96bu-2')
-        champlist_default = [name.get_text() for name in names]
+        champlist_raw = [name.get_text() for name in names]
 
         champlist_for_splash_download = []
-        for name in champlist_default:
+        for name in champlist_raw:
             name = name.replace(' ', '')
             name = name.replace("'", '')
             name = name.replace(".", '')
@@ -50,69 +56,70 @@ class Downloader():
         return champlist_for_splash_download
 
 
-    def scrapeSplashes(self, champlist, download_bool=False):
+    def scrape_splashes(self, champlist, download=False):
+        """
+        Scrapes raw splash arts from league of legends website.  Makes
+        necessary crops + edits to each splash, and saves an inverted copy
+        of each to file.
+        """
+
         for name in champlist:
-            if download_bool:
-                link = 'https://ddragon.leagueoflegends.com/cdn/img/champion/splash/' + name + '_0.jpg'
-
-                name = self.editNameForSave(name)
+            if download:
+                url = self.splash_url_prefix + name + self.splash_url_suffix
+                name = self.convert_to_save_name(name)
                 print('Downloading splash: ' + name)
-
-                urllib.request.urlretrieve(link, 'Splashes_Raw/' + name + '.bmp')
+                urllib.request.urlretrieve(url, 'Splashes_Raw/' + name + '.bmp')
             else:
-                name = self.editNameForSave(name)
+                name = self.convert_to_save_name(name)
                 print('Fixing splash: ' + name)
 
             splash = Image.open(self.splash_path + name + '.bmp')
-
             splash = self.IEdit.faceCover(name, splash)
             splash = self.IEdit.fixSplashes(name, splash)
             splash = self.IEdit.scaleSplash(name, splash)
             splash.save('Splashes/' + name + '.bmp')
-
             splash = ImageOps.mirror(splash)
             splash.save('Splashes/' + name + '_inverted.bmp')
 
 
-    def scrapeIcons(self, champlist, download_bool=False):
+    def scrape_icons(self, champlist, download=False):
+        """
+        Scrapes raw icons arts from wiki website.  Makes necessary crops +
+        edits and saves a single copy of each to file (icons don't get flipped
+        in champion select)
+        """
+
         for name in champlist:
 
-            if download_bool:
-                url_prefix = 'https://lol.gamepedia.com/File:'
-                url_suffix = 'Square.png'
-                link = url_prefix + name + url_suffix
+            if download:
+                url = self.icon_url_prefix + name + self.icon_url_suffix
+                name = self.convert_to_save_name(name)
 
-                uClient = uReq(link)
+                uClient = uReq(url)
                 page_html = uClient.read()
                 uClient.close()
 
                 soup = BeautifulSoup(page_html, 'html.parser')
                 image_url = soup.find(id='file').a.get('href')
-
-                name = self.editNameForSave(name)
-
                 print('Downloading icon: ' + name)
                 urllib.request.urlretrieve(image_url, 'Icons_Raw/' + name + '.bmp')
             else:
-                name = self.editNameForSave(name)
+                name = self.convert_to_save_name(name)
                 print('Fixing icon: ' + name)
 
             icon = Image.open(self.icon_path + name + '.bmp')
-
             icon = self.IEdit.fixIcons(name, icon)
             icon = self.IEdit.scaleIcon(name, icon)
             icon.save('Icons/' + name + '.bmp')
-
             icon = ImageOps.mirror(icon)
             icon.save('Icons/' + name + '_inverted.bmp')
 
 
     """ CHAMPLIST """
 
-    def fixAndExportChamplist(self, champlist):
-        print('Exporting champlist.txt')
-
+    def get_champlist_for_saving(self, champlist):
         champlist_fixed = []
+
         for name in champlist:
             name = name.replace("Chogath", 'ChoGath')
             name = name.replace("Kaisa", 'KaiSa')
@@ -122,16 +129,19 @@ class Downloader():
             name = name.replace("Velkoz", 'VelKoz')
             champlist_fixed.append(name)
 
-        os.remove('champlist.txt')
-        with open('champlist.txt', 'x') as f:
+        with suppress(FileNotFoundError):
+            os.remove(self.champlist_filename)
+
+        with open(self.champlist_filename, 'x') as f:
             for name in champlist_fixed:
                 f.write(name + '\n')
 
         return champlist_fixed
 
 
-    def fixChamplistForIconDownload(self, champlist):
+    def get_champlist_for_icon_download(self, champlist):
         champlist_for_icon_download = []
+
         for name in champlist:
             name = name.replace('\n', '')
             name = name.replace(' ', '')
@@ -156,7 +166,9 @@ class Downloader():
         return champlist_for_icon_download
 
 
-    def editNameForSave(self, name):
+    """ NAMING """
+
+    def convert_to_save_name(self, name):
         name = name.replace('\n', '')
         name = name.replace('%27', '')
         name = name.replace('_', '')

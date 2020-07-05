@@ -312,6 +312,7 @@ class ImageEditor():
     """ SCALING """
 
     def scaleSplash(self, champname, splash_image):
+        """ Scales given splash by it's specific scale factor. """
 
         scale_factor = splash_scales[champname]
 
@@ -330,6 +331,7 @@ class ImageEditor():
 
 
     def scaleIcon(self, champname, icon_image):
+        """ Scales given icon by it's specific scale factor. """
 
         scale_factor = icon_scales[champname]
 
@@ -349,6 +351,8 @@ class ImageEditor():
 
     """ MANIPULATING """
     def faceCover(self, champ_name, splash_image):
+        """ Blocks out unwanted champions from dual champion splashes. """
+
         if champ_name == 'Xayah':
             print('                               ... blocking out Rakan')
             draw = ImageDraw.Draw(splash_image)
@@ -373,6 +377,14 @@ class ImageEditor():
 
 
     def fixSplashes(self, champ_name, splash_image):
+        """
+        Crops and edits each splash to be recognisable by its crop.
+
+        Some splashes get rotated / edited by broadcast graphic teams for
+        better showing in champion select, this converts the raw splash arts
+        to a much closer form that's used on broadcast to be able to match.
+        """
+
         # INDEX = 16
         if champ_name == 'Camille':
             print('                               ... tilting')
@@ -1022,6 +1034,11 @@ class ImageEditor():
 
 
     def fixIcons(self, champ_name, icon_image):
+        """
+        Manually overrides some very low % match rate icons to more
+        recognisable forms.
+        """
+
         if (champ_name == 'Akali'):
             print('                               ... finding icon')
             icon_image = Image.open('Manual_Image_Overrides/Akali_icon.bmp')
