@@ -1,4 +1,4 @@
-from PIL import Image, ImageChops, ImageDraw, ImageEnhance
+from PIL import Image, ImageOps, ImageChops, ImageDraw, ImageEnhance
 
 
 splash_scales = {
@@ -307,76 +307,86 @@ icon_scales = {
 class ImageEditor():
 
     def __init__(self):
-        pass
+        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Splashes_Raw/'
+        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Icons_Raw/'
+        self.manual_override_path = 'D:/Scripts/Python/ChampSelectAnalyser/Manual_Image_Overrides/'
+        self.champlist_path = 'D:/Scripts/Python/ChampSelectAnalyser/champlist.txt'
 
-    """ SCALING """
+        self.champlist = self.import_champlist()
 
-    def scaleSplash(self, champname, splash_image):
+
+    """ IMAGE MANIPULATING """
+
+    def splash_complete_fix(self, champ_name):
+        splash = Image.open(self.splash_path + champ_name + '.bmp')
+
+        splash = self.splash_face_cover(champ_name, splash)
+        splash = self.splash_edit(champ_name, splash)
+        splash = self.splash_scale(champ_name, splash)
+
+        splash.save('Splashes/' + champ_name + '.bmp')
+        splash = ImageOps.mirror(splash)
+        splash.save('Splashes/' + champ_name + '_inverted.bmp')
+
+
+    def icon_complete_fix(self, champ_name):
+        icon = Image.open(self.icon_path + champ_name + '.bmp')
+        icon = self.icon_manual_override(champ_name, icon)
+        icon = self.icon_scale(champ_name, icon)
+
+        icon.save('Icons/' + champ_name + '.bmp')
+        icon = ImageOps.mirror(icon)
+        icon.save('Icons/' + champ_name + '_inverted.bmp')
+
+
+    @staticmethod
+    def splash_scale(champ_name, splash):
         """ Scales given splash by it's specific scale factor. """
 
-        scale_factor = splash_scales[champname]
+        scale_factor = splash_scales[champ_name]
 
         if scale_factor != 1.00:
-            print('                               ... scaling')
+            print('                         - scaling splash')
 
-            w, h = splash_image.size
+            w, h = splash.size
             w = round(w * scale_factor)
             h = round(h * scale_factor)
 
-            resized_img = splash_image.resize((w, h))
+            resized_img = splash.resize((w, h))
         else:
-            resized_img = splash_image
+            resized_img = splash
 
         return resized_img
 
 
-    def scaleIcon(self, champname, icon_image):
-        """ Scales given icon by it's specific scale factor. """
-
-        scale_factor = icon_scales[champname]
-
-        if scale_factor != 1.00:
-            print('                               ... scaling')
-
-            w, h = icon_image.size
-            w = round(w * scale_factor)
-            h = round(h * scale_factor)
-
-            resized_img = icon_image.resize((w, h))
-        else:
-            resized_img = icon_image
-
-        return resized_img
-
-
-    """ MANIPULATING """
-    def faceCover(self, champ_name, splash_image):
+    @staticmethod
+    def splash_face_cover(champ_name, splash):
         """ Blocks out unwanted champions from dual champion splashes. """
 
         if champ_name == 'Xayah':
-            print('                               ... blocking out Rakan')
-            draw = ImageDraw.Draw(splash_image)
+            print('                         - blocking out Rakan')
+            draw = ImageDraw.Draw(splash)
             draw.rectangle([(400, 20), (600, 200)], 'black')
 
-        if champ_name == 'Rakan':
-            print('                               ... blocking out Xayah')
-            draw = ImageDraw.Draw(splash_image)
+        elif champ_name == 'Rakan':
+            print('                         - blocking out Xayah')
+            draw = ImageDraw.Draw(splash)
             draw.rectangle([(300, 120), (500, 300)], 'black')
 
-        if champ_name == 'Kayle':
-            print('                               ... blocking out Morgana')
-            draw = ImageDraw.Draw(splash_image)
+        elif champ_name == 'Kayle':
+            print('                         - blocking out Morgana')
+            draw = ImageDraw.Draw(splash)
             draw.rectangle([(200, 120), (500, 300)], 'black')
 
-        if champ_name == 'Morgana':
-            print('                               ... blocking out Kayle')
-            draw = ImageDraw.Draw(splash_image)
+        elif champ_name == 'Morgana':
+            print('                         - blocking out Kayle')
+            draw = ImageDraw.Draw(splash)
             draw.rectangle([(200, 120), (500, 300)], 'black')
 
-        return splash_image
+        return splash
 
 
-    def fixSplashes(self, champ_name, splash_image):
+    def splash_edit(self, champ_name, splash):
         """
         Crops and edits each splash to be recognisable by its crop.
 
@@ -387,676 +397,700 @@ class ImageEditor():
 
         # INDEX = 16
         if champ_name == 'Camille':
-            print('                               ... tilting')
-            splash_image = splash_image.rotate(2)
+            print('                         - tilting')
+            splash = splash.rotate(2)
 
-        if champ_name == 'Corki':
-            print('                               ... tilting')
-            w, h = splash_image.size
-            splash_image = splash_image.resize((int(w * 0.98), int(h * 1.05)))
+        elif champ_name == 'Corki':
+            print('                         - tilting')
+            w, h = splash.size
+            splash = splash.resize((int(w * 0.98), int(h * 1.05)))
 
-        if champ_name == 'Ezreal':
-            print('                               ... oldifying')
-            splash_image = Image.open('Manual_Image_Overrides/Ezreal_old.jpg').convert(
-                'RGB')
+        elif champ_name == 'Ezreal':
+            print('                         - oldifying')
+            splash = Image.open(f'{self.manual_override_path}Ezreal_old.jpg').convert('RGB')
 
-        if champ_name == 'Galio':
-            print('                               ... darkening')
-            splash_image = Image.open(
-                'Manual_Image_Overrides/Galio_gradient2.bmp').convert('RGB')
+        elif champ_name == 'Galio':
+            print('                         - darkening')
+            splash = Image.open(f'{self.manual_override_path}Galio_gradient2.bmp').convert('RGB')
 
         # INDEX = 83
-        if champ_name == 'Orianna':
-            print('                               ... tilting')
-            splash_image = ImageChops.offset(splash_image, 0, 100)
-            splash_image = splash_image.rotate(9)
+        elif champ_name == 'Orianna':
+            print('                         - tilting')
+            splash = ImageChops.offset(splash, 0, 100)
+            splash = splash.rotate(9)
 
         # INDEX = 85
-        if champ_name == 'Ornn':
-            print('                               ... darkening')
-            splash_image = ImageEnhance.Brightness(splash_image)
-            splash_image = splash_image.enhance(0.90)
-            print('                               ... blurring')
-            splash_image = ImageEnhance.Sharpness(splash_image)
-            splash_image = splash_image.enhance(0.00)
+        elif champ_name == 'Ornn':
+            print('                         - darkening')
+            splash = ImageEnhance.Brightness(splash)
+            splash = splash.enhance(0.90)
+            print('                         - blurring')
+            splash = ImageEnhance.Sharpness(splash)
+            splash = splash.enhance(0.00)
 
-        if champ_name == 'Pyke':
-            print('                               ... darkening')
-            splash_image = ImageEnhance.Sharpness(splash_image)
-            splash_image = splash_image.enhance(0.00)
+        elif champ_name == 'Pyke':
+            print('                         - darkening')
+            splash = ImageEnhance.Sharpness(splash)
+            splash = splash.enhance(0.00)
 
-        if champ_name == 'Ryze':
-            print('                               ... tilting')
-            splash_image = splash_image.rotate(24)
+        elif champ_name == 'Ryze':
+            print('                         - tilting')
+            splash = splash.rotate(24)
 
         # the changes below crop out largely irrelevant parts of the splash arts,
         # improving search time drastically
         if champ_name == 'Aatrox':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Ahri':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Ahri':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Akali':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Akali':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Alistar':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 100, 1000, 600))
+        elif champ_name == 'Alistar':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 100, 1000, 600))
 
-        if champ_name == 'Amumu':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Amumu':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Anivia':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Anivia':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Annie':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Annie':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Aphelios':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Aphelios':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Ashe':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Ashe':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'AurelionSol':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'AurelionSol':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Azir':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Azir':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Bard':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Bard':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Blitzcrank':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'Blitzcrank':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'Brand':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Brand':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Braum':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Braum':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Caitlyn':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Caitlyn':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Camille':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Camille':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Cassiopeia':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Cassiopeia':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'ChoGath':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 100, 1100, 600))
+        elif champ_name == 'ChoGath':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 100, 1100, 600))
 
-        if champ_name == 'Corki':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Corki':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Darius':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Darius':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Diana':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'Diana':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'Draven':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'Draven':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'DrMundo':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'DrMundo':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Ekko':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Ekko':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Elise':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Elise':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Evelynn':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Evelynn':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
         # Ez uses manual splash, can't be cropped by the same structure
-        # if champ_name == 'Ezreal':
-        # 	print('                               ... cropping')
-        # 	splash_image = splash_image.crop((700, 000, 1200, 500))
+        # elif champ_name == 'Ezreal':
+        # 	print(        '             ... cropping splash')
+        # 	splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Fiddlesticks':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Fiddlesticks':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Fiora':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Fiora':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Fizz':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Fizz':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Galio':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Galio':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Gangplank':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Gangplank':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Garen':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Garen':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Gnar':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'Gnar':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'Gragas':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Gragas':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Graves':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Graves':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Hecarim':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Hecarim':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Heimerdinger':
-            print('                               ... cropping')
-            w, h = splash_image.size
-            splash_image = splash_image.crop((400, 000, w, h))
+        elif champ_name == 'Heimerdinger':
+            print('                         - cropping splash')
+            w, h = splash.size
+            splash = splash.crop((400, 000, w, h))
 
-        if champ_name == 'Illaoi':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Illaoi':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Irelia':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Irelia':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Ivern':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Ivern':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Janna':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Janna':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'JarvanIV':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'JarvanIV':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Jax':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Jax':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Jayce':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Jayce':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Jhin':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Jhin':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Jinx':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Jinx':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'KaiSa':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'KaiSa':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Kalista':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Kalista':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Karma':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Karma':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Karthus':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Karthus':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Kassadin':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1100, 500))
+        elif champ_name == 'Kassadin':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1100, 500))
 
-        if champ_name == 'Katarina':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 100, 1000, 600))
+        elif champ_name == 'Katarina':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 100, 1000, 600))
 
-        if champ_name == 'Kayle':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Kayle':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Kayn':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 100, 900, 600))
+        elif champ_name == 'Kayn':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 100, 900, 600))
 
-        if champ_name == 'Kennen':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1200, 500))
+        elif champ_name == 'Kennen':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1200, 500))
 
-        if champ_name == 'KhaZix':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'KhaZix':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'Kindred':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Kindred':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Kled':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1200, 500))
+        elif champ_name == 'Kled':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1200, 500))
 
-        if champ_name == 'KogMaw':
-            print('                               ... cropping')
-            w, h = splash_image.size
-            splash_image = splash_image.crop((500, 000, w, h))
+        elif champ_name == 'KogMaw':
+            print('                         - cropping splash')
+            w, h = splash.size
+            splash = splash.crop((500, 000, w, h))
 
-        if champ_name == 'LeBlanc':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'LeBlanc':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'LeeSin':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'LeeSin':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Leona':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Leona':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Lissandra':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Lissandra':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Lucian':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'Lucian':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'Lulu':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'Lulu':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'Lux':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Lux':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Malphite':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1100, 600))
+        elif champ_name == 'Malphite':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1100, 600))
 
-        if champ_name == 'Malzahar':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Malzahar':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Maokai':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Maokai':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'MasterYi':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'MasterYi':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'MissFortune':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'MissFortune':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Mordekaiser':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((300, 000, 800, 500))
+        elif champ_name == 'Mordekaiser':
+            print('                         - cropping splash')
+            splash = splash.crop((300, 000, 800, 500))
 
-        if champ_name == 'Morgana':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Morgana':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Nami':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Nami':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Nasus':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Nasus':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Nautilus':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1200, 500))
+        elif champ_name == 'Nautilus':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1200, 500))
 
-        if champ_name == 'Neeko':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((300, 000, 900, 500))
+        elif champ_name == 'Neeko':
+            print('                         - cropping splash')
+            splash = splash.crop((300, 000, 900, 500))
 
-        if champ_name == 'Nidalee':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Nidalee':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Nocturne':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 100, 1000, 600))
+        elif champ_name == 'Nocturne':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 100, 1000, 600))
 
         # Unsure where the crop starts for Nunu in new splash - update needed later
-        # if champ_name == 'Nunu':
-        # 	print('                               ... cropping')
-        # 	splash_image = splash_image.crop((700, 000, 1200, 500))
-
-        if champ_name == 'Olaf':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
-
-        if champ_name == 'Orianna':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
-
-        if champ_name == 'Ornn':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Pantheon':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Poppy':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1100, 500))
-
-        if champ_name == 'Pyke':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((300, 000, 800, 500))
-
-        if champ_name == 'Qiyana':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((300, 000, 800, 500))
-
-        if champ_name == 'Quinn':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
-
-        if champ_name == 'Rakan':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Rammus':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
-
-        if champ_name == 'RekSai':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 100, 900, 600))
-
-        if champ_name == 'Renekton':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 1000, 500))
-
-        if champ_name == 'Rengar':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Riven':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
-
-        if champ_name == 'Rumble':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Ryze':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1200, 500))
-
-        if champ_name == 'Sejuani':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Senna':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Sett':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Shaco':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Shen':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
-
-        if champ_name == 'Shyvana':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Singed':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Sion':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Sivir':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
-
-        if champ_name == 'Skarner':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 100, 1200, 600))
-
-        if champ_name == 'Sona':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Soraka':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Swain':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Sylas':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Syndra':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
-
-        if champ_name == 'TahmKench':
-            print('                               ... cropping')
-            w, h = splash_image.size
-            splash_image = splash_image.crop((200, 000, w, h))
-
-        if champ_name == 'Taliyah':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
-
-        if champ_name == 'Talon':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Taric':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
-
-        if champ_name == 'Teemo':
-            print('                               ... cropping')
-            w, h = splash_image.size
-            splash_image = splash_image.crop((400, 000, w, (h - 100)))
-
-        if champ_name == 'Thresh':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
-
-        if champ_name == 'Tristana':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1100, 500))
-
-        if champ_name == 'Trundle':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
-
-        if champ_name == 'Tryndamere':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'TwistedFate':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
-
-        if champ_name == 'Twitch':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 100, 1000, 600))
-
-        if champ_name == 'Udyr':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 100, 900, 600))
+        # elif champ_name == 'Nunu':
+        # 	print(        '             ... cropping splash')
+        # 	splash = splash.crop((700, 000, 1200, 500))
+
+        elif champ_name == 'Olaf':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
+
+        elif champ_name == 'Orianna':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
+
+        elif champ_name == 'Ornn':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Pantheon':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Poppy':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1100, 500))
+
+        elif champ_name == 'Pyke':
+            print('                         - cropping splash')
+            splash = splash.crop((300, 000, 800, 500))
+
+        elif champ_name == 'Qiyana':
+            print('                         - cropping splash')
+            splash = splash.crop((300, 000, 800, 500))
+
+        elif champ_name == 'Quinn':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
+
+        elif champ_name == 'Rakan':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Rammus':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
+
+        elif champ_name == 'RekSai':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 100, 900, 600))
+
+        elif champ_name == 'Renekton':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 1000, 500))
+
+        elif champ_name == 'Rengar':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Riven':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
+
+        elif champ_name == 'Rumble':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Ryze':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1200, 500))
+
+        elif champ_name == 'Sejuani':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Senna':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Sett':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Shaco':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Shen':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
+
+        elif champ_name == 'Shyvana':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Singed':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Sion':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Sivir':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
+
+        elif champ_name == 'Skarner':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 100, 1200, 600))
+
+        elif champ_name == 'Sona':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Soraka':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Swain':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Sylas':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Syndra':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
+
+        elif champ_name == 'TahmKench':
+            print('                         - cropping splash')
+            w, h = splash.size
+            splash = splash.crop((200, 000, w, h))
+
+        elif champ_name == 'Taliyah':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
+
+        elif champ_name == 'Talon':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Taric':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
+
+        elif champ_name == 'Teemo':
+            print('                         - cropping splash')
+            w, h = splash.size
+            splash = splash.crop((400, 000, w, (h - 100)))
+
+        elif champ_name == 'Thresh':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
+
+        elif champ_name == 'Tristana':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1100, 500))
+
+        elif champ_name == 'Trundle':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
+
+        elif champ_name == 'Tryndamere':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'TwistedFate':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
+
+        elif champ_name == 'Twitch':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 100, 1000, 600))
+
+        elif champ_name == 'Udyr':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 100, 900, 600))
+
+        elif champ_name == 'Urgot':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Urgot':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Varus':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Varus':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Vayne':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Vayne':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Veigar':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1100, 500))
 
-        if champ_name == 'Veigar':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1100, 500))
+        elif champ_name == 'VelKoz':
+            print('                         - cropping splash')
+            w, h = splash.size
+            splash = splash.crop((300, 000, w, (h - 100)))
 
-        if champ_name == 'VelKoz':
-            print('                               ... cropping')
-            w, h = splash_image.size
-            splash_image = splash_image.crop((300, 000, w, (h - 100)))
+        elif champ_name == 'Vi':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Vi':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Viktor':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Viktor':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Vladimir':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Vladimir':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        # champ reworked, this will need to be updated
+        elif champ_name == 'Volibear':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Volibear':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Warwick':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 200, 1100, 700))
 
-        if champ_name == 'Warwick':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 200, 1100, 700))
+        elif champ_name == 'Wukong':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Wukong':
-            print('                               ... croppin')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Xayah':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Xayah':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Xerath':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Xerath':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'XinZhao':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'XinZhao':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Yasuo':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Yasuo':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        elif champ_name == 'Yorick':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Yorick':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Yuumi':
+            print('                         - cropping splash')
+            splash = splash.crop((200, 000, 900, 400))
 
-        if champ_name == 'Yuumi':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((200, 000, 900, 400))
+        elif champ_name == 'Zac':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 200, 1100, 700))
 
-        if champ_name == 'Zac':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 200, 1100, 700))
+        elif champ_name == 'Zed':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1100, 500))
 
-        if champ_name == 'Zed':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1100, 500))
+        elif champ_name == 'Ziggs':
+            print('                         - cropping splash')
+            splash = splash.crop((600, 000, 1200, 500))
 
-        if champ_name == 'Ziggs':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((600, 000, 1200, 500))
+        elif champ_name == 'Zilean':
+            print('                         - cropping splash')
+            splash = splash.crop((500, 000, 1000, 500))
 
-        if champ_name == 'Zilean':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((500, 000, 1000, 500))
+        elif champ_name == 'Zoe':
+            print('                         - cropping splash')
+            splash = splash.crop((400, 000, 900, 500))
 
-        if champ_name == 'Zoe':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((400, 000, 900, 500))
+        elif champ_name == 'Zyra':
+            print('                         - cropping splash')
+            splash = splash.crop((700, 000, 1200, 500))
 
-        if champ_name == 'Zyra':
-            print('                               ... cropping')
-            splash_image = splash_image.crop((700, 000, 1200, 500))
+        return splash
 
-        return splash_image
 
+    @staticmethod
+    def icon_scale(champ_name, icon):
+        """ Scales given icon by it's specific scale factor. """
 
-    def fixIcons(self, champ_name, icon_image):
+        scale_factor = icon_scales[champ_name]
+
+        if scale_factor != 1.00:
+            print('                         - scaling icon')
+
+            w, h = icon.size
+            w = round(w * scale_factor)
+            h = round(h * scale_factor)
+
+            resized_img = icon.resize((w, h))
+        else:
+            resized_img = icon
+
+        return resized_img
+
+
+    def icon_manual_override(self, champ_name, icon):
         """
         Manually overrides some very low % match rate icons to more
         recognisable forms.
         """
 
-        if (champ_name == 'Akali'):
-            print('                               ... finding icon')
-            icon_image = Image.open('Manual_Image_Overrides/Akali_icon.bmp')
+        if champ_name == 'Akali':
+            print('                         - finding icon')
+            icon = Image.open(f'{self.manual_override_path}Akali_icon.bmp')
 
-        if (champ_name == 'Aphelios'):
-            print('                               ... finding icon')
-            icon_image = Image.open('Manual_Image_Overrides/Aphelios_icon.bmp')
+        elif champ_name == 'Aphelios':
+            print('                         - finding icon')
+            icon = Image.open(f'{self.manual_override_path}Aphelios_icon.bmp')
 
-        if (champ_name == 'Mordekaiser'):
-            print('                               ... finding icon')
-            icon_image = Image.open('Manual_Image_Overrides/Mordekaiser_icon.bmp')
+        elif champ_name == 'Mordekaiser':
+            print('                         - finding icon')
+            icon = Image.open(f'{self.manual_override_path}Mordekaiser_icon.bmp')
 
-        if (champ_name == 'Pyke'):
-            print('                               ... finding icon')
-            icon_image = Image.open('Manual_Image_Overrides/Pyke_icon.bmp')
+        elif champ_name == 'Pyke':
+            print('                         - finding icon')
+            icon = Image.open(f'{self.manual_override_path}Pyke_icon.bmp')
 
-        if (champ_name == 'Rakan'):
-            print('                               ... finding icon')
-            icon_image = Image.open('Manual_Image_Overrides/Rakan_icon.bmp')
+        elif champ_name == 'Rakan':
+            print('                         - finding icon')
+            icon = Image.open(f'{self.manual_override_path}Rakan_icon.bmp')
 
-        return icon_image
+        return icon
+
+
+    def import_champlist(self):
+        with open(self.champlist_path, 'r') as f:
+            return [name.strip() for name in f]
