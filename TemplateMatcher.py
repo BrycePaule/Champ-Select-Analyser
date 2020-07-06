@@ -30,8 +30,10 @@ class TemplateMatcher():
     """ TEMPLATE MATCHING """
 
     def analyse_champion_select(self, match_all=False):
+        images = self.get_champ_select_image(match_all)
 
-        for image in self.get_champ_select_image(match_all):
+        for image in images:
+            print(len(images))
             print(f'Working on {image}')
 
             self.cropper.create_templates(image)
@@ -53,7 +55,7 @@ class TemplateMatcher():
         """
 
         if all_templates:
-            return (f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp"))
+            return [f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")]
         else:
             return [[f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")][-1]]
 

@@ -22,7 +22,7 @@ class GoogleDriveInterface():
         self.col_increment = 5
 
 
-    def output_to_spreadsheet(self, bans_results, picks_results):
+    def output_to_spreadsheet(self, ban_results, pick_results):
         """
         Authorises, and connects to given google sheet.  Prints TemplateMatcher
         results to the given location on the sheet
@@ -34,29 +34,29 @@ class GoogleDriveInterface():
         row = self.row_start
         col = self.col_start
 
-        sheet.update_cell(row, col, (bans_results[0].split(' - '))[1])
-        sheet.update_cell(row + 1, col, (bans_results[1].split(' - '))[1])
-        sheet.update_cell(row + 2, col, (bans_results[2].split(' - '))[1])
-        sheet.update_cell(row + 3, col, (bans_results[3].split(' - '))[1])
-        sheet.update_cell(row + 4, col, (bans_results[4].split(' - '))[1])
+        sheet.update_cell(row, col, (ban_results[0][1]))
+        sheet.update_cell(row + 1, col, (ban_results[1][1]))
+        sheet.update_cell(row + 2, col, (ban_results[2][1]))
+        sheet.update_cell(row + 3, col, (ban_results[3][1]))
+        sheet.update_cell(row + 4, col, (ban_results[4][1]))
 
-        sheet.update_cell(row, col + 1, (picks_results[0].split(' - '))[1])
-        sheet.update_cell(row + 1, col + 1, (picks_results[1].split(' - '))[1])
-        sheet.update_cell(row + 2, col + 1, (picks_results[2].split(' - '))[1])
-        sheet.update_cell(row + 3, col + 1, (picks_results[3].split(' - '))[1])
-        sheet.update_cell(row + 4, col + 1, (picks_results[4].split(' - '))[1])
+        sheet.update_cell(row, col + 1, (pick_results[0][1]))
+        sheet.update_cell(row + 1, col + 1, (pick_results[1][1]))
+        sheet.update_cell(row + 2, col + 1, (pick_results[2][1]))
+        sheet.update_cell(row + 3, col + 1, (pick_results[3][1]))
+        sheet.update_cell(row + 4, col + 1, (pick_results[4][1]))
 
-        sheet.update_cell(row, col + 2, (picks_results[5].split(' - '))[1])
-        sheet.update_cell(row + 1, col + 2, (picks_results[6].split(' - '))[1])
-        sheet.update_cell(row + 2, col + 2, (picks_results[7].split(' - '))[1])
-        sheet.update_cell(row + 3, col + 2, (picks_results[8].split(' - '))[1])
-        sheet.update_cell(row + 4, col + 2, (picks_results[9].split(' - '))[1])
+        sheet.update_cell(row, col + 2, (pick_results[5][1]))
+        sheet.update_cell(row + 1, col + 2, (pick_results[6][1]))
+        sheet.update_cell(row + 2, col + 2, (pick_results[7][1]))
+        sheet.update_cell(row + 3, col + 2, (pick_results[8][1]))
+        sheet.update_cell(row + 4, col + 2, (pick_results[9][1]))
 
-        sheet.update_cell(row, col + 3, (bans_results[5].split(' - '))[1])
-        sheet.update_cell(row + 1, col + 3, (bans_results[6].split(' - '))[1])
-        sheet.update_cell(row + 2, col + 3, (bans_results[7].split(' - '))[1])
-        sheet.update_cell(row + 3, col + 3, (bans_results[8].split(' - '))[1])
-        sheet.update_cell(row + 4, col + 3, (bans_results[9].split(' - '))[1])
+        sheet.update_cell(row, col + 3, (ban_results[5][1]))
+        sheet.update_cell(row + 1, col + 3, (ban_results[6][1]))
+        sheet.update_cell(row + 2, col + 3, (ban_results[7][1]))
+        sheet.update_cell(row + 3, col + 3, (ban_results[8][1]))
+        sheet.update_cell(row + 4, col + 3, (ban_results[9][1]))
 
         self.row_start += self.row_increment
         self.col_start += self.col_increment

@@ -1,16 +1,13 @@
 import time
 import datetime
 import sys
-import os
 
-from PIL import Image
+from contextlib import suppress
 
 from Downloader import Downloader
 from ImageEditor import ImageEditor
 from TemplateMatcher import TemplateMatcher
 from GoogleDriveInterface import GoogleDriveInterface
-from TemplateCropper import TemplateCropper
-from AccuracyManager import AccuracyManager
 
 
 """ TIMERS """
@@ -81,10 +78,6 @@ def handle_parameters():
     spreadsheet_URL = None
     worksheet_name = None
 
-    print(len(sys.argv))
-    for arg in sys.argv:
-        print(arg)
-
     if len(sys.argv) >= 2:
         if '-d' in sys.argv or '-download' in sys.argv:
             run_scrape_and_scale(download=True)
@@ -96,6 +89,11 @@ def handle_parameters():
 
         if '-a' in sys.argv or '-all' in sys.argv:
             match_all = True
+
+            if '-a' in sys.argv:
+                sys.argv.remove('-a')
+            if '-all' in sys.argv:
+                sys.argv.remove('-all')
 
         if len(sys.argv) >= 3:
             spreadsheet_URL = sys.argv[1]
