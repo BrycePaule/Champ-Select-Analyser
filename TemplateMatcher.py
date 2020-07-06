@@ -3,6 +3,7 @@ import numpy as np
 import cv2 as cv
 
 from AccuracyManager import AccuracyManager
+from TemplateCropper import TemplateCropper
 
 
 class TemplateMatcher():
@@ -23,14 +24,38 @@ class TemplateMatcher():
         self.champlist = self.import_champlist()
         self.duplicate_count = template_duplicate_count
 
+        self.cropper = TemplateCropper(self.duplicate_count)
 
-    def clear_stored_results(self):
-        """ Clears results directory of any previous results """
 
-        previous_results = [f for f in os.listdir(self.results_path) if f.endswith(".bmp")]
+    """ TEMPLATE MATCHING """
 
-        for f in previous_results:
-            os.remove(os.path.join(self.results_path, f))
+    def analyse_champion_select(self, match_all=False):
+
+        for image in self.get_champ_select_image(match_all):
+            print(f'Working on {image}')
+
+            self.cropper.create_templates(image)
+
+            bans, picks = self.organise_templates()
+            ban_results = self.match(bans, bans=True)
+            pick_results = self.match(picks)
+
+            self.print_results(ban_results, bans=True)
+            self.print_results(pick_results)
+
+            return ban_results, pick_results
+
+
+    def get_champ_select_image(self, all_templates=False):
+        """
+        Returns the latest champ select screenshot, or a list of all
+        screenshots in the directory if all=True
+        """
+
+        if all_templates:
+            return (f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp"))
+        else:
+            return [[f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")][-1]]
 
 
     def organise_templates(self):
@@ -47,7 +72,7 @@ class TemplateMatcher():
         bans = np.array(bans)
         bans.shape = 10, templates_per_slot
 
-        return picks, bans
+        return bans, picks
 
 
     def match(self, templates, bans=False):
@@ -148,6 +173,16 @@ class TemplateMatcher():
 
         return template_array
 
+
+    """ MISC """
+
+    def clear_stored_results(self):
+        """ Clears results directory of any previous results """
+
+        previous_results = [f for f in os.listdir(self.results_path) if f.endswith(".bmp")]
+
+        for f in previous_results:
+            os.remove(os.path.join(self.results_path, f))
 
     def update_accuracy(self, results, bans=False):
         accuracy_manager = AccuracyManager()

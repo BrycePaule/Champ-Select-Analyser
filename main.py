@@ -54,67 +54,62 @@ def run_scrape_and_scale(download=False):
     end_timer(time_start)
 
 
-def run_crop_and_match():
+def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None, worksheet=None):
 
-    """ GET USER INPUT """
-    google_sheet_name, worksheet_name = handle_parameters()
+    if spreadsheet_URL is None:
+        spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ')
+
+    if worksheet is None:
+        worksheet = input('Enter worksheet name (enter to skip): ')
 
     time_start = time.perf_counter()
 
-    duplicate_count = 3
-    match_all = False
-
-    cropper = TemplateCropper(duplicate_count)
+    GDI = GoogleDriveInterface(spreadsheet_URL, worksheet)
     matcher = TemplateMatcher(duplicate_count)
-    GDI = GoogleDriveInterface()
+    ban_results, pick_results = matcher.analyse_champion_select(match_all)
 
-    # Google Sheet output location + increments
-    row_inc = 0      # distance from top-left cell of game to game
-    col_inc = 5      # distance from top-left cell of game to game
+    end_timer(time_start)
 
-
-    for image in cropper.get_champ_select_image():
-        print(f'Working on {image}')
-
-        cropper.create_templates()
-        picks, bans = matcher.organise_templates()
-
-
-        bans_results = matcher.match(bans, bans=True)
-        picks_results = matcher.match(picks)
-
-        matcher.print_results(bans_results)
-        matcher.print_results(picks_results)
-
-
-        end_timer(time_start)
-
-        if len(google_sheet_name) >= 10:
-            print('Sending results to Google Sheet ... ')
-            GDI.output_to_spreadsheet(bans_results, picks_results, google_sheet_name, worksheet_name)
-            GDI.row_start += row_inc
-            GDI.col_start += col_inc
+    if spreadsheet_URL is not None:
+        print('Sending results to Google Sheet ... ')
+        GDI.output_to_spreadsheet(ban_results, pick_results)
 
 
 def handle_parameters():
-    if len(sys.argv) > 1:
-        google_sheet_name = sys.argv[1]
-        if sys.argv[2] == 'Game':
-            worksheet_name = sys.argv[2] + ' ' + sys.argv[3]
-        else:
+
+    match_all = False
+    spreadsheet_URL = None
+    worksheet_name = None
+
+    print(len(sys.argv))
+    for arg in sys.argv:
+        print(arg)
+
+    if len(sys.argv) >= 2:
+        if '-d' in sys.argv or '-download' in sys.argv:
+            run_scrape_and_scale(download=True)
+        elif '-e' in sys.argv or '-edit' in sys.argv:
+            run_scrape_and_scale()
+
+        if '-nm' in sys.argv or '-nomatch' in sys.argv:
+            return
+
+        if '-a' in sys.argv or '-all' in sys.argv:
+            match_all = True
+
+        if len(sys.argv) >= 3:
+            spreadsheet_URL = sys.argv[1]
             worksheet_name = sys.argv[2]
-    else:
-        google_sheet_name = input('Enter spreadsheet URL: ')
-        worksheet_name = input('Enter worksheet name: ')
 
-    return google_sheet_name, worksheet_name
+            if len(sys.argv) >= 4:
+                worksheet_name = ' '.join(sys.argv[2:])
 
+    run_crop_and_match(
+        match_all=match_all,
+        spreadsheet_URL=spreadsheet_URL,
+        worksheet=worksheet_name
+    )
 
 if __name__ == '__main__':
-    # if len(sys.argv) > 1:
-    #     if sys.argv[1] == '-d':
-    #         run_scrape_and_scale(download=True)
-    # else:
-    #     run_scrape_and_scale()
 
-    run_crop_and_match()
+    handle_parameters()

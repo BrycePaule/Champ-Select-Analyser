@@ -23,8 +23,10 @@ class Downloader():
     def __init__(self):
         self.IEdit = ImageEditor()
 
-        self.splash_path = '/Assets/Splashes_Raw/'
-        self.icon_path = '/Assets/Icons_Raw/'
+        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
+        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons/'
+        self.splash_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes_Raw/'
+        self.icon_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons_Raw/'
 
         self.champlist_filename = 'champlist.txt'
 
@@ -63,7 +65,7 @@ class Downloader():
 
         url = self.splash_url_prefix + name + self.splash_url_suffix
         name = self.convert_to_save_name(name)
-        urllib.request.urlretrieve(url, 'Splashes_Raw/' + name + '.bmp')
+        urllib.request.urlretrieve(url, f'{self.splash_raw_path}/{name}.bmp')
 
 
     def scrape_icon(self, name):
@@ -81,7 +83,7 @@ class Downloader():
 
         soup = BeautifulSoup(page_html, 'html.parser')
         image_url = soup.find(id='file').a.get('href')
-        urllib.request.urlretrieve(image_url, 'Icons_Raw/' + name + '.bmp')
+        urllib.request.urlretrieve(image_url, f'{self.icon_raw_path}/{name}.bmp')
 
 
     """ CHAMPLIST """

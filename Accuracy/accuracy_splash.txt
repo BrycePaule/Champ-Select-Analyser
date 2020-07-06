@@ -1,4 +1,4 @@
-Aatrox 1
+Aatrox 2
 Ahri 0
 Akali 4
 Alistar 3
@@ -8,7 +8,7 @@ Annie 0
 Aphelios 8
 Ashe 4
 AurelionSol 0
-Azir 4
+Azir 21
 Bard 10
 Blitzcrank 3
 Brand 2
@@ -48,7 +48,7 @@ Jhin 0
 Jinx 17
 KaiSa 12
 Kalista 6
-Karma 10
+Karma 24
 Karthus 2
 Kassadin 2
 Katarina 0
@@ -70,7 +70,7 @@ Malphite 0
 Malzahar 0
 Maokai 27
 MasterYi 0
-MissFortune 10
+MissFortune 17
 Mordekaiser 6
 Morgana 17
 Nami 11
@@ -96,7 +96,7 @@ Rengar 0
 Riven 0
 Rumble 4
 Ryze 28
-Sejuani 5
+Sejuani 7
 Senna 12
 Sett 8
 Shaco 0
@@ -139,7 +139,7 @@ Xerath 0
 XinZhao 3
 Yasuo 4
 Yorick 0
-Yuumi 4
+Yuumi 5
 Zac 13
 Zed 0
 Ziggs 2

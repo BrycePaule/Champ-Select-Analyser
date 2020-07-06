@@ -23,7 +23,7 @@ class TemplateCropper():
 
     """ TEMPLATE CREATION """
 
-    def create_templates(self):
+    def create_templates(self, champ_select_image):
         """
         Main external function call.
 
@@ -36,18 +36,17 @@ class TemplateCropper():
         self.check_crop_coordinates(self.ban_coords, bans=True)
         self.check_crop_coordinates(self.pick_coords)
 
-        for champ_select in self.get_champ_select_image(all_templates=False):
-            print('Cropper working on: ' + champ_select)
+        print('Cropper working on: ' + champ_select_image)
 
-            image = Image.open(f'{self.champ_select_path}{champ_select}')
+        image = Image.open(f'{self.champ_select_path}{champ_select_image}')
 
-            print('                                ... cropping templates')
-            self.crop_templates(image, self.ban_coords)
-            self.crop_templates(image, self.pick_coords)
+        print('                                ... cropping templates')
+        self.crop_templates(image, self.ban_coords)
+        self.crop_templates(image, self.pick_coords)
 
-            print('                                ... making duplicates')
-            self.create_duplicates(self.ban_coords, bans=True)
-            self.create_duplicates(self.pick_coords)
+        print('                                ... making duplicates')
+        self.create_duplicates(self.ban_coords, bans=True)
+        self.create_duplicates(self.pick_coords)
 
 
     def crop_templates(self, champ_select_image, coordinates):
@@ -98,18 +97,6 @@ class TemplateCropper():
                 copy_image.save(f'{self.template_path}{crop}_{counter}(b).bmp')
 
                 resize_factor += resize_factor_fixed
-
-
-    def get_champ_select_image(self, all_templates=False):
-        """
-        Returns the latest champ select screenshot, or a list of all
-        screenshots in the directory if all=True
-        """
-
-        if all_templates:
-            return (f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp"))
-        else:
-            return [[f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")][-1]]
 
 
     """ SETUP """
