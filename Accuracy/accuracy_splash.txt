@@ -1,7 +1,7 @@
 Aatrox 2
 Ahri 0
 Akali 4
-Alistar 3
+Alistar 7
 Amumu 0
 Anivia 0
 Annie 0
@@ -12,7 +12,7 @@ Azir 21
 Bard 10
 Blitzcrank 3
 Brand 2
-Braum 34
+Braum 39
 Caitlyn 12
 Camille 7
 Cassiopeia 4
@@ -46,7 +46,7 @@ Jax 5
 Jayce 66
 Jhin 0
 Jinx 17
-KaiSa 12
+KaiSa 14
 Kalista 6
 Karma 24
 Karthus 2
@@ -63,7 +63,7 @@ LeBlanc 4
 LeeSin 80
 Leona 4
 Lissandra 3
-Lucian 6
+Lucian 7
 Lulu 9
 Lux 6
 Malphite 0
@@ -94,7 +94,7 @@ RekSai 4
 Renekton 1
 Rengar 0
 Riven 0
-Rumble 4
+Rumble 8
 Ryze 28
 Sejuani 7
 Senna 12
@@ -144,5 +144,5 @@ Zac 13
 Zed 0
 Ziggs 2
 Zilean 4
-Zoe 7
+Zoe 8
 Zyra 0

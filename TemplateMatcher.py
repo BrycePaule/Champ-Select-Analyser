@@ -29,23 +29,23 @@ class TemplateMatcher():
 
     """ TEMPLATE MATCHING """
 
-    def analyse_champion_select(self, match_all=False):
-        images = self.get_champ_select_image(match_all)
+    def analyse_champion_select(self, image):
+        """
+        Main function to be called externally.
 
-        for image in images:
-            print(len(images))
-            print(f'Working on {image}')
+        Crops the given champ select into relevant templates.  TemplateMatches
+        those to find which slot is which champion, returns results
+        """
+        self.cropper.create_templates(image)
 
-            self.cropper.create_templates(image)
+        bans, picks = self.organise_templates()
+        ban_results = self.match(bans, bans=True)
+        pick_results = self.match(picks)
 
-            bans, picks = self.organise_templates()
-            ban_results = self.match(bans, bans=True)
-            pick_results = self.match(picks)
+        self.print_results(ban_results, bans=True)
+        self.print_results(pick_results)
 
-            self.print_results(ban_results, bans=True)
-            self.print_results(pick_results)
-
-            return ban_results, pick_results
+        return ban_results, pick_results
 
 
     def get_champ_select_image(self, all_templates=False):
@@ -55,7 +55,7 @@ class TemplateMatcher():
         """
 
         if all_templates:
-            return [f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")]
+            return (f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp"))
         else:
             return [[f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")][-1]]
 

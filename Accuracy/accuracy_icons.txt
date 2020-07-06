@@ -47,7 +47,7 @@ Jayce 71
 Jhin 0
 Jinx 0
 KaiSa 82
-Kalista 33
+Kalista 34
 Karma 22
 Karthus 11
 Kassadin 19
@@ -59,7 +59,7 @@ KhaZix 0
 Kindred 60
 Kled 0
 KogMaw 47
-LeBlanc 27
+LeBlanc 37
 LeeSin 110
 Leona 28
 Lissandra 7
@@ -70,7 +70,7 @@ Malphite 0
 Malzahar 0
 Maokai 25
 MasterYi 0
-MissFortune 10
+MissFortune 140
 Mordekaiser 19
 Morgana 51
 Nami 11
@@ -124,7 +124,7 @@ TwistedFate 0
 Twitch 0
 Udyr 0
 Urgot 0
-Varus 4
+Varus 5
 Vayne 0
 Veigar 0
 VelKoz 14
@@ -134,15 +134,15 @@ Vladimir 0
 Volibear 34
 Warwick 0
 Wukong 0
-Xayah 23
+Xayah 24
 Xerath 0
 XinZhao 0
 Yasuo 39
 Yorick 0
-Yuumi 4
+Yuumi 17
 Zac 0
 Zed 0
 Ziggs 0
 Zilean 3
-Zoe 4
+Zoe 20
 Zyra 0
