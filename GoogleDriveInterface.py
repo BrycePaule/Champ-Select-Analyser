@@ -18,7 +18,7 @@ class GoogleDriveInterface():
         self.col_increment = 5
 
 
-    def outputToGoogleSheet(self, bans_results, picks_results, sheet_name, worksheet_name):
+    def output_to_spreadsheet(self, bans_results, picks_results, sheet_name, worksheet_name):
         client = gspread.authorize(self.creds)
         sheet = client.open_by_url(sheet_name).worksheet(worksheet_name)
 

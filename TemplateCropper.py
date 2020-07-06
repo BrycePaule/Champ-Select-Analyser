@@ -31,7 +31,7 @@ class TemplateCropper():
         and duplicates
         """
 
-        self.clear_templates()
+        self.clear_stored_templates()
 
         self.check_crop_coordinates(self.ban_coords, bans=True)
         self.check_crop_coordinates(self.pick_coords)
@@ -114,7 +114,7 @@ class TemplateCropper():
 
     """ SETUP """
 
-    def clear_templates(self):
+    def clear_stored_templates(self):
         """ Clears template directory of any previous templates """
 
         templates = [f for f in os.listdir(self.template_path) if f.endswith(".bmp")]

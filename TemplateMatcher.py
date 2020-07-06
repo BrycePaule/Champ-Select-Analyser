@@ -1,7 +1,8 @@
 import os
 import numpy as np
 import cv2 as cv
-import time
+
+from AccuracyManager import AccuracyManager
 
 
 class TemplateMatcher():
@@ -19,11 +20,11 @@ class TemplateMatcher():
         self.accuracy_filepath_picks = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_splash.txt/'
         self.accuracy_filepath_bans = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_icons.txt/'
 
-        self.champlist = self.importChamplist()
+        self.champlist = self.import_champlist()
         self.duplicate_count = template_duplicate_count
 
 
-    def clear_results(self):
+    def clear_stored_results(self):
         """ Clears results directory of any previous results """
 
         previous_results = [f for f in os.listdir(self.results_path) if f.endswith(".bmp")]
@@ -49,10 +50,13 @@ class TemplateMatcher():
         return picks, bans
 
 
-    def match(self, templates, slot_type='picks'):
+    def match(self, templates, bans=False):
         """
         Clusterfuck of logic that template matches champ select crops against
-        champion splashes and ban icons
+        champion splashes and ban icons.
+
+        Returns a list strings containing:
+            image label, champion name, and match counter
 
         Effectively it follow this procedure:
             - takes a template from the 2D array
@@ -66,9 +70,10 @@ class TemplateMatcher():
         cleaned up a LOT, this is a nested mess of break statements, terrible
         """
 
-        search_results = []
+        self.clear_stored_results()
+        results = []
 
-        if slot_type == 'bans':
+        if bans:
             threshold = .70
             image_filepath = self.icon_path
         else:
@@ -82,20 +87,20 @@ class TemplateMatcher():
             for template_label in row:
                 template_image = cv.imread(f'{self.template_path}{template_label}', 0)
                 matches = 0
-                champ_found = False
+                match_found = False
 
                 if skip_slot:
                     break
 
-                for name in self.champlist:
-                    if champ_found:
+                for champ_name in self.champlist:
+                    if match_found:
                         skip_slot = True
                         break
 
-                    print(' Matching --> ' + template_label + '   -   ' + name)
+                    print(f' Matching --> {template_label}   -   {champ_name}')
                     image_filepaths = [
-                        f'{image_filepath}{name}.bmp',
-                        f'{image_filepath}{name}_inverted.bmp'
+                        f'{image_filepath}{champ_name}.bmp',
+                        f'{image_filepath}{champ_name}_inverted.bmp'
                     ]
 
                     for filepath in image_filepaths:
@@ -105,26 +110,27 @@ class TemplateMatcher():
                         loc = np.where(res >= threshold)
 
                         for match in zip(*loc[::-1]):
-                            champ_found = True
+                            match_found = True
                             matches += 1
 
-                        if champ_found:
-                            print(f'                                        Found {matches} matches: -- ' + name)
-                            search_results.append(f'{template_label} - {name} - {matches}')
-
-                            if slot_type == 'bans':
-                                self.updateAccuracy(name, matches, bans=True)
-                            else:
-                                self.updateAccuracy(name, matches)
-
+                        if match_found:
+                            print(f'                                        Found {matches} matches: -- ' + champ_name)
+                            results.append([template_label, champ_name, matches])
                             break
 
+        self.update_accuracy(results, bans)
 
-        return search_results
+        return results
 
 
-    def editTemplates(self, template_array, desired_pick_filename):
-        """ manually overrides the list, for quicker testing """
+    def manual_template_override(self, template_array, desired_label):
+        """
+        Manually overrides the template list with a single known entry,
+        for quicker testing.
+
+        e.g. manual_template_override(picks, 'r4.bmp')
+        (picks in this instance is the output of organise_templates())
+        """
 
         # turns np.array into list
         picks_list = template_array.tolist()
@@ -134,124 +140,40 @@ class TemplateMatcher():
         for i in range(10):
             mains_list.append(picks_list[i][0])
 
-        mains_list.remove(desired_pick_filename)
+        mains_list.remove(desired_label)
 
         # changes original template_array to the file we want
         for filename in mains_list:
-            template_array = np.where(template_array == str(filename),
-                                      desired_pick_filename, template_array)
+            template_array = np.where(template_array == str(filename), desired_label, template_array)
 
         return template_array
 
 
-    """ OUTPUTS """
-
-    def printResultsToConsole(self, results_array):
-        for i in range(len(results_array)):
-            a, b, c = results_array[i].split('-')
-
-            if (i == 0):
-                print(' -> Blue:')
-
-            if (i == 5):
-                print(' -> Red:')
-
-            print(' ' + a + ' = ' + b + ' ... ' + c)
-        print()
+    def update_accuracy(self, results, bans=False):
+        accuracy_manager = AccuracyManager()
+        accuracy_manager.update_accuracy_file(results, bans)
 
 
-    def printUnknownAccuracy(self):
-        with open(self.accuracy_filepath_picks, 'r') as f:
-            counter = 0
+    """ OUTPUT """
 
-            print()
-            print('List of currently un-searched for champs:')
-            print()
-
-            for line in f:
-                champname, acc = line.split(' - ')
-                champname = champname.strip()
-                acc = acc.strip()
-
-                if (int(acc) == 0):
-                    counter += 1
-                    print(champname + ': ' + str(acc))
-
-            print()
-            print('Total: ' + str(counter) + ' unkown champs')
-
-
-    def printLowAccuracy(self):
-        with open(self.accuracy_filepath_picks, 'r') as f:
-            counter = 0
-
-            print()
-            print('List of currently low accuracy champs: ')
-            print()
-
-            for line in f:
-                champname, acc = line.split(' - ')
-                champname = champname.strip()
-                acc = acc.strip()
-
-                if (int(acc) <= 5):
-                    counter += 1
-                    print(champname + ': ' + str(acc))
-
-            print()
-            print(
-                'Total: ' + str(counter) + ' low accuracy champs')
-
-
-    """ ACCURACY """
-
-    def updateAccuracy(self, name, num_matches, bans=True):
-        """ Updates accuracy trackers """
-
-        overall_match_accuracy = []
+    def print_results(self, results_array, bans=False):
 
         if bans:
-            accuracy_filepath = self.accuracy_filepath_bans
+            print('\n ------------ Bans ------------ ')
         else:
-            accuracy_filepath = self.accuracy_filepath_picks
+            print('\n ------------ Picks ------------ ')
 
-        with open(accuracy_filepath, 'r') as f:
-            for line in f:
-                champname, acc = line.split('-')
-                champname = champname.strip()
-                acc = acc.strip()
-                overall_match_accuracy.append(champname)
-                overall_match_accuracy.append(acc)
+        for i, (slot_label, champ_name, match_count) in enumerate(results_array):
+            if i == 0:
+                print('Blue:')
+            elif i == 5:
+                print('Red:')
 
-        index = overall_match_accuracy.index(name)
-        overall_match_accuracy[index + 1] = num_matches
-
-        with open(accuracy_filepath, 'w') as f:
-            counter = 0
-            for match in overall_match_accuracy:
-
-                if (counter % 2) == 0:
-                    champname = match
-                else:
-                    champ_matches = match
-                    f.write(champname + ' - ' + str(champ_matches) + '\n')
-
-                counter += 1
-
-
-    def createDefaultAccuracyFile(self, icons=False):
-        if icons:
-            with open(self.accuracy_filepath_bans, 'w') as f:
-                for name in self.champlist:
-                    f.write(name + ' - ' + '0 \n')
-        else:
-            with open(self.accuracy_filepath_bans, 'w') as f:
-                for name in self.champlist:
-                    f.write(name + ' - ' + '0 \n')
+            print(f'   {slot_label}   {champ_name}   {match_count}')
 
 
     """ CHAMPLIST """
 
-    def importChamplist(self):
+    def import_champlist(self):
         with open(self.champlist_path, 'r') as f:
             return [name.strip() for name in f]

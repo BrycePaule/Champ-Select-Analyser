@@ -10,6 +10,7 @@ from ImageEditor import ImageEditor
 from TemplateMatcher import TemplateMatcher
 from GoogleDriveInterface import GoogleDriveInterface
 from TemplateCropper import TemplateCropper
+from AccuracyManager import AccuracyManager
 
 
 """ TIMERS """
@@ -54,7 +55,14 @@ def run_scrape_and_scale(download=False):
 
 
 def run_crop_and_match():
+
+    """ GET USER INPUT """
+    google_sheet_name, worksheet_name = handle_parameters()
+
+    time_start = time.perf_counter()
+
     duplicate_count = 3
+    match_all = False
 
     cropper = TemplateCropper(duplicate_count)
     matcher = TemplateMatcher(duplicate_count)
@@ -64,6 +72,31 @@ def run_crop_and_match():
     row_inc = 0      # distance from top-left cell of game to game
     col_inc = 5      # distance from top-left cell of game to game
 
+
+    for image in cropper.get_champ_select_image():
+        print(f'Working on {image}')
+
+        cropper.create_templates()
+        picks, bans = matcher.organise_templates()
+
+
+        bans_results = matcher.match(bans, bans=True)
+        picks_results = matcher.match(picks)
+
+        matcher.print_results(bans_results)
+        matcher.print_results(picks_results)
+
+
+        end_timer(time_start)
+
+        if len(google_sheet_name) >= 10:
+            print('Sending results to Google Sheet ... ')
+            GDI.output_to_spreadsheet(bans_results, picks_results, google_sheet_name, worksheet_name)
+            GDI.row_start += row_inc
+            GDI.col_start += col_inc
+
+
+def handle_parameters():
     if len(sys.argv) > 1:
         google_sheet_name = sys.argv[1]
         if sys.argv[2] == 'Game':
@@ -74,50 +107,7 @@ def run_crop_and_match():
         google_sheet_name = input('Enter spreadsheet URL: ')
         worksheet_name = input('Enter worksheet name: ')
 
-    time_start = time.perf_counter()
-
-    print(google_sheet_name)
-    print(worksheet_name)
-
-    cropper.create_templates()
-
-
-    for image in cropper.get_champ_select_image():
-
-        # CROPPER
-
-        cropper.create_templates()
-
-        # MATCHER
-        print('Matcher working on: ' + image)
-
-        matcher.clear_results()
-
-        picks, bans = matcher.organise_templates()
-        # picks = editTemplates(picks, 'r4.bmp')
-        # bans = editTemplates(bans, 'rb3.bmp')
-
-        bans_results = matcher.match(bans, slot_type='bans')
-        picks_results = matcher.match(picks, slot_type='picks')
-
-        print(' ------------ Bans ------------ ')
-        matcher.printResultsToConsole(bans_results)
-        print(' ------------ Picks ------------ ')
-        matcher.printResultsToConsole(picks_results)
-
-        end_timer(time_start)
-
-        if google_sheet_name != '':
-            print('Sending results to Google Sheet ... ')
-            GDI.outputToGoogleSheet(bans_results, picks_results, google_sheet_name, worksheet_name)
-            GDI.row_start += row_inc
-            GDI.col_start += col_inc
-
-
-
-
-    # printUnknownAccuracy('accuracy_splash.txt')
-    # printLowAccuracy('accuracy_splash.txt')
+    return google_sheet_name, worksheet_name
 
 
 if __name__ == '__main__':
