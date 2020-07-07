@@ -6,7 +6,7 @@ Amumu 0
 Anivia 0
 Annie 0
 Aphelios 8
-Ashe 4
+Ashe 5
 AurelionSol 0
 Azir 21
 Bard 10
@@ -81,7 +81,7 @@ Nidalee 16
 Nocturne 7
 Nunu 0
 Olaf 2
-Orianna 5
+Orianna 6
 Ornn 5
 Pantheon 10
 Poppy 5

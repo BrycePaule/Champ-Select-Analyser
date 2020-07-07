@@ -8,7 +8,7 @@ Annie 0
 Aphelios 11
 Ashe 0
 AurelionSol 0
-Azir 2
+Azir 34
 Bard 10
 Blitzcrank 55
 Brand 0
@@ -48,7 +48,7 @@ Jhin 0
 Jinx 0
 KaiSa 82
 Kalista 34
-Karma 22
+Karma 27
 Karthus 11
 Kassadin 19
 Katarina 0
@@ -120,7 +120,7 @@ Thresh 26
 Tristana 0
 Trundle 40
 Tryndamere 0
-TwistedFate 0
+TwistedFate 2
 Twitch 0
 Udyr 0
 Urgot 0
@@ -133,7 +133,7 @@ Viktor 0
 Vladimir 0
 Volibear 34
 Warwick 0
-Wukong 0
+Wukong 38
 Xayah 24
 Xerath 0
 XinZhao 0

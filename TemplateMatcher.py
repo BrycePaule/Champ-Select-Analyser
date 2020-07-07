@@ -145,6 +145,9 @@ class TemplateMatcher():
                             results.append([template_label, champ_name, matches])
                             break
 
+                    if champ_name == self.champlist[-1] and not match_found:
+                        results.append([None, None, 0])
+
         self.update_accuracy(results, bans)
 
         return results
@@ -185,6 +188,7 @@ class TemplateMatcher():
 
         for f in previous_results:
             os.remove(os.path.join(self.results_path, f))
+
 
     def update_accuracy(self, results, bans=False):
         accuracy_manager = AccuracyManager()

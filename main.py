@@ -61,19 +61,18 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
 
     time_start = time.perf_counter()
 
-    GDI = GoogleDriveInterface(spreadsheet_URL, worksheet)
     matcher = TemplateMatcher(duplicate_count)
 
     for image in matcher.get_champ_select_image(match_all):
         print(f'Working on {image}')
-
         ban_results, pick_results = matcher.analyse_champion_select(image)
 
         end_timer(time_start)
 
         if spreadsheet_URL is not None:
             print('Sending results to Google Sheet ... ')
-            GDI.output_to_spreadsheet(ban_results, pick_results)
+            GDI = GoogleDriveInterface(spreadsheet_URL, worksheet)
+            GDI.output_to_LCK_sheet(ban_results, pick_results)
 
 
 def handle_parameters():
@@ -109,7 +108,8 @@ def handle_parameters():
     run_crop_and_match(
         match_all=match_all,
         spreadsheet_URL=spreadsheet_URL,
-        worksheet=worksheet_name
+        worksheet=worksheet_name,
+        duplicate_count=0
     )
 
 if __name__ == '__main__':

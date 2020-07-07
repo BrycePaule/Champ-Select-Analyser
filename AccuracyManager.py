@@ -41,6 +41,8 @@ class AccuracyManager():
             stored_accuracy = {champ_name: int(accuracy) for (champ_name, accuracy) in [line.strip().split(' ') for line in f]}
 
         for _, champ_name, match_accuracy in match_results:
+            if champ_name is None:
+                continue
             if stored_accuracy[champ_name] < match_accuracy:
                 stored_accuracy[champ_name] = match_accuracy
 
