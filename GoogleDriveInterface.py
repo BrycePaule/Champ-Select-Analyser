@@ -71,4 +71,3 @@ class GoogleDriveInterface():
         self.sheet.update('N23:N27', blue_picks)
         self.sheet.update('O23:O27', red_bans)
         self.sheet.update('P23:P27', red_picks)
-

@@ -109,7 +109,7 @@ def handle_parameters():
         match_all=match_all,
         spreadsheet_URL=spreadsheet_URL,
         worksheet=worksheet_name,
-        duplicate_count=0
+        # duplicate_count=0
     )
 
 if __name__ == '__main__':

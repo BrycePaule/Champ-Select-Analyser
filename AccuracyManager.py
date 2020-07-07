@@ -65,6 +65,7 @@ class AccuracyManager():
 
 
     def print_unknown_accuracy(self, bans=False):
+        """ Prints a list of champs with unknown accuracy to console.  """
 
         if bans:
             accuracy_filepath = self.accuracy_filepath_bans
@@ -87,6 +88,7 @@ class AccuracyManager():
 
 
     def print_low_accuracy(self, bans=False):
+        """ Prints a list of champs with low accuracy to console.  """
 
         if bans:
             accuracy_filepath = self.accuracy_filepath_bans
@@ -111,5 +113,7 @@ class AccuracyManager():
 
 
     def import_champlist(self):
+        """ Imports champlist from file. """
+
         with open(self.champlist_path, 'r') as f:
             return [name.strip() for name in f]

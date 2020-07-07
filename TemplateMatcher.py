@@ -8,6 +8,10 @@ from TemplateCropper import TemplateCropper
 
 class TemplateMatcher():
 
+    """
+    Main program functionality, handles actually template matching champ
+    select slots with champion images
+    """
 
     def __init__(self, template_duplicate_count):
         self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
@@ -36,9 +40,14 @@ class TemplateMatcher():
         Crops the given champ select into relevant templates.  TemplateMatches
         those to find which slot is which champion, returns results
         """
+
         self.cropper.create_templates(image)
 
         bans, picks = self.organise_templates()
+
+        # bans = self.manual_template_override(bans, 'bb2.bmp')
+        # picks = self.manual_template_override(picks, 'r4.bmp')
+
         ban_results = self.match(bans, bans=True)
         pick_results = self.match(picks)
 
@@ -61,6 +70,11 @@ class TemplateMatcher():
 
 
     def organise_templates(self):
+        """
+        Organises an unsorted list of all templates in the directory into
+        pick / ban numpy arrays for ease of use.
+        """
+
         all_templates = os.listdir(self.template_path)
         templates_per_slot = ((self.duplicate_count * 2) + 1)  # X sml, X big + original
 
@@ -146,37 +160,29 @@ class TemplateMatcher():
                             break
 
                     if champ_name == self.champlist[-1] and not match_found:
-                        results.append([None, None, 0])
+                        results.append([template_label, None, 0])
 
         self.update_accuracy(results, bans)
 
         return results
 
 
-    def manual_template_override(self, template_array, desired_label):
+    def manual_template_override(self, templates, desired_label):
         """
-        Manually overrides the template list with a single known entry,
+        Manually overrides the template list with a single given label,
         for quicker testing.
 
         e.g. manual_template_override(picks, 'r4.bmp')
         (picks in this instance is the output of organise_templates())
         """
 
-        # turns np.array into list
-        picks_list = template_array.tolist()
-        mains_list = []
+        template_count_per_slot = (self.duplicate_count * 2) + 1
 
-        # removes the picks we don't want
-        for i in range(10):
-            mains_list.append(picks_list[i][0])
+        new_templates = [[desired_label for label in slot] for slot in templates]
+        new_templates = np.array(new_templates)
+        new_templates.shape = 10, template_count_per_slot
 
-        mains_list.remove(desired_label)
-
-        # changes original template_array to the file we want
-        for filename in mains_list:
-            template_array = np.where(template_array == str(filename), desired_label, template_array)
-
-        return template_array
+        return new_templates
 
 
     """ MISC """
@@ -191,6 +197,8 @@ class TemplateMatcher():
 
 
     def update_accuracy(self, results, bans=False):
+        """ Updates TemplateMatcher accuracy trackers. """
+
         accuracy_manager = AccuracyManager()
         accuracy_manager.update_accuracy_file(results, bans)
 
@@ -198,23 +206,44 @@ class TemplateMatcher():
     """ OUTPUT """
 
     def print_results(self, results_array, bans=False):
+        """ Print results to console. """
 
         if bans:
-            print('\n ------------ Bans ------------ ')
+            print('\n -------------------------  Bans  ------------------------- ')
         else:
-            print('\n ------------ Picks ------------ ')
+            print('\n -------------------------  Picks  ------------------------- ')
 
-        for i, (slot_label, champ_name, match_count) in enumerate(results_array):
-            if i == 0:
-                print('Blue:')
-            elif i == 5:
-                print('Red:')
+        # calculates string lengths for printing
+        max_label_len = 7
+        max_champ_name_len = len(max([champ_name for _, champ_name, _ in results_array if champ_name is not None], key=len))
+        max_accuracy_len = 2
 
-            print(f'   {slot_label}   {champ_name}   {match_count}')
+        team_zip = zip(results_array[:5], results_array[5:])
+
+        for result in team_zip:
+            b_label, b_champ, b_match = result[0]
+            r_label, r_champ, r_match = result[1]
+
+            if b_champ is None:
+                b_champ = ''
+            elif r_champ is None:
+                r_champ = ''
+
+            print(
+                f'{b_label.ljust(max_label_len)}   '
+                f'{b_champ.ljust(max_champ_name_len)}   '
+                f'{str(b_match).zfill(max_accuracy_len).ljust(max_accuracy_len)}'
+                f'   |   '
+                f'{str(r_match).zfill(max_accuracy_len).rjust(max_accuracy_len)}   '
+                f'{r_champ.rjust(max_champ_name_len)}   '
+                f'{r_label.rjust(max_label_len)}'
+            )
 
 
     """ CHAMPLIST """
 
     def import_champlist(self):
+        """ Imports champlist from file. """
+
         with open(self.champlist_path, 'r') as f:
             return [name.strip() for name in f]
