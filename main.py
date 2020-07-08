@@ -59,9 +59,13 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
 
     if spreadsheet_URL is None:
         spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ')
+        if spreadsheet_URL.isspace() or spreadsheet_URL == '':
+            spreadsheet_URL = None
 
     if worksheet is None:
         worksheet = input('Enter worksheet name (enter to skip): ')
+        if worksheet.isspace() or worksheet == '':
+            worksheet = None
 
     time_start = time.perf_counter()
 
@@ -115,6 +119,7 @@ def handle_parameters():
         worksheet=worksheet_name,
         # duplicate_count=0
     )
+
 
 if __name__ == '__main__':
 
