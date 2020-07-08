@@ -354,8 +354,7 @@ class ImageEditor():
         icon.save(self.icon_path + champ_name + '_inverted.bmp')
 
 
-    @staticmethod
-    def splash_scale(champ_name, splash):
+    def splash_scale(self, champ_name, splash):
         """ Scales given splash by it's specific scale factor. """
 
         scale_factor = splash_scales[champ_name]
@@ -374,8 +373,7 @@ class ImageEditor():
         return resized_img
 
 
-    @staticmethod
-    def splash_face_cover(champ_name, splash):
+    def splash_face_cover(self, champ_name, splash):
         """ Blocks out unwanted champions from dual champion splashes. """
 
         if champ_name == 'Xayah':
@@ -1057,8 +1055,7 @@ class ImageEditor():
         return splash
 
 
-    @staticmethod
-    def icon_scale(champ_name, icon):
+    def icon_scale(self, champ_name, icon):
         """ Scales given icon by it's specific scale factor. """
 
         scale_factor = icon_scales[champ_name]
@@ -1109,6 +1106,7 @@ class ImageEditor():
     """ CHAMPLIST """
 
     def import_champlist(self):
-        """ Imports locally stored champlist """
+        """ Imports champlist from file. """
+
         with open(self.champlist_path, 'r') as f:
             return [name.strip() for name in f]

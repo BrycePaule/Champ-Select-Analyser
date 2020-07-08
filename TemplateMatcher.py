@@ -159,8 +159,8 @@ class TemplateMatcher():
                             results.append([template_label, champ_name, matches])
                             break
 
-                    if champ_name == self.champlist[-1] and not match_found:
-                        results.append([template_label, None, 0])
+                if template_label == row[-1] and not match_found:
+                    results.append([row[0], None, 0])
 
         self.update_accuracy(results, bans)
 
@@ -226,7 +226,7 @@ class TemplateMatcher():
 
             if b_champ is None:
                 b_champ = ''
-            elif r_champ is None:
+            if r_champ is None:
                 r_champ = ''
 
             print(
