@@ -32,6 +32,10 @@ def run_scrape_and_scale(download=False):
 
     if download:
         DL = Downloader()
+
+        DL.check_for_directory(DL.splash_raw_path, DL.splash_raw_directory_name)
+        DL.check_for_directory(DL.icon_raw_path, DL.icon_raw_directory_name)
+
         DL.scrape_champlist_raw()
         DL.convert_champlist_to_save()
         DL.convert_champlist_to_splash()

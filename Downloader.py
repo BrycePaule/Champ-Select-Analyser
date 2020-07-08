@@ -23,10 +23,15 @@ class Downloader():
     def __init__(self):
         self.IEdit = ImageEditor()
 
-        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
-        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons/'
-        self.splash_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes_Raw/'
-        self.icon_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons_Raw/'
+        self.splash_directory_name = 'Splashes'
+        self.splash_raw_directory_name = 'Splashes_Raw'
+        self.icon_directory_name = 'Icons'
+        self.icon_raw_directory_name = 'Icons_Raw'
+
+        self.splash_path = f'D:/Scripts/Python/ChampSelectAnalyser/Assets/{self.splash_directory_name}/'
+        self.icon_path = f'D:/Scripts/Python/ChampSelectAnalyser/Assets/{self.icon_directory_name}/'
+        self.splash_raw_path = f'D:/Scripts/Python/ChampSelectAnalyser/Assets/{self.splash_raw_directory_name}/'
+        self.icon_raw_path = f'D:/Scripts/Python/ChampSelectAnalyser/Assets/{self.icon_raw_directory_name}/'
 
         self.champlist_filename = 'champlist.txt'
 
@@ -65,7 +70,7 @@ class Downloader():
 
         url = self.splash_url_prefix + name + self.splash_url_suffix
         name = self.convert_to_save_name(name)
-        urllib.request.urlretrieve(url, f'{self.splash_raw_path}/{name}.bmp')
+        urllib.request.urlretrieve(url, f'{self.splash_raw_path}{name}.bmp')
 
 
     def scrape_icon(self, name):
@@ -83,7 +88,13 @@ class Downloader():
 
         soup = BeautifulSoup(page_html, 'html.parser')
         image_url = soup.find(id='file').a.get('href')
-        urllib.request.urlretrieve(image_url, f'{self.icon_raw_path}/{name}.bmp')
+        urllib.request.urlretrieve(image_url, f'{self.icon_raw_path}{name}.bmp')
+
+
+    @staticmethod
+    def check_for_directory(filepath, directory_name):
+        if not os.path.exists(filepath):
+            os.mkdir(f'Assets/{directory_name}')
 
 
     """ CHAMPLIST """
