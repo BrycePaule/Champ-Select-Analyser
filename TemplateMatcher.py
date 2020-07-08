@@ -99,7 +99,7 @@ class TemplateMatcher():
         Returns a list strings containing:
             image label, champion name, and match counter
 
-        Effectively it follow this procedure:
+        Effectively follows this procedure:
             - takes a template from the 2D array
             - steps through every champion in champlist
             - checks the template against both splash/icon, normal and inverted

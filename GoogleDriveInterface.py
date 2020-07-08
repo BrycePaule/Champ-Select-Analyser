@@ -64,10 +64,10 @@ class GoogleDriveInterface():
 
         blue_bans = [[champ_name] for (_, champ_name, _) in ban_results[:5]]
         blue_picks = [[champ_name] for (_, champ_name, _) in pick_results[:5]]
-        red_bans = [[champ_name] for (_, champ_name, _) in ban_results[:5]]
-        red_picks = [[champ_name] for (_, champ_name, _) in pick_results[:5]]
+        red_bans = [[champ_name] for (_, champ_name, _) in ban_results[5:]]
+        red_picks = [[champ_name] for (_, champ_name, _) in pick_results[5:]]
 
         self.sheet.update('M23:M27', blue_bans)
         self.sheet.update('N23:N27', blue_picks)
-        self.sheet.update('O23:O27', red_bans)
-        self.sheet.update('P23:P27', red_picks)
+        self.sheet.update('O23:O27', red_picks)
+        self.sheet.update('P23:P27', red_bans)
