@@ -15,7 +15,7 @@ Has 3 major functions:
 
 <b> Use: </b> 
 <br>
-Default use runs all 3 major functions
+Default use runs all 3 major functions (scrape, edit and match)
 
 `-d` or `-download` downloads champlist + splash arts <br>
 `-e` or `-edit` edits splashes for usability <br>
