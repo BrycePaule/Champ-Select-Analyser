@@ -11,7 +11,7 @@ CSA has 3 major functions:
 
 <br>
 
-<b> Useage: </b> 
+<b> Usage: </b> 
 <br>
 Default usage (no arguments) runs all 3 major functions (scrape, edit and match)
 
