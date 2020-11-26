@@ -20,4 +20,4 @@ Default usage (no arguments) runs all 3 major functions (scrape, edit and match)
 `-nm` or `-nomatch` omits template matching (just downloads champlist and/or edits splashes) <br>
 `-a` or `-all` allows matching of multiple champselects (all in given directory) as opposed to a single screenshot <br>
 
-You will be prompted to provide google sheet information on launch, if left blank it still run without trying to output results externally.
+You will be prompted to provide google sheet information on launch, if left blank it will still run without trying to output results externally, only to stdout.
