@@ -4,7 +4,7 @@ Champ-Select-Analyser is a command line tool used to turn LCK Champion select sc
 
 <br>
 
-Major process':
+Major uses:
 - Web scraping and updating most recent champion list + champion splash arts
 - Slightly edits and optmises the raw splashes to be more usable, both for accuracy and speed
 - Template matching champ selects against those criteria for data collection
