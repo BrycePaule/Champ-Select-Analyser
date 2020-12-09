@@ -8,11 +8,6 @@ from TemplateCropper import TemplateCropper
 
 class TemplateMatcher():
 
-    """
-    Main program functionality, handles actually template matching champ
-    select slots with champion images
-    """
-
     def __init__(self, template_duplicate_count):
         self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
         self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons/'

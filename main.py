@@ -2,8 +2,6 @@ import time
 import datetime
 import sys
 
-from contextlib import suppress
-
 from Downloader import Downloader
 from ImageEditor import ImageEditor
 from TemplateMatcher import TemplateMatcher
@@ -83,7 +81,7 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
             GDI.output_to_LCK_sheet(ban_results, pick_results)
 
 
-def handle_parameters():
+def run():
 
     match_all = False
     spreadsheet_URL = None
@@ -117,10 +115,8 @@ def handle_parameters():
         match_all=match_all,
         spreadsheet_URL=spreadsheet_URL,
         worksheet=worksheet_name,
-        # duplicate_count=0
     )
 
 
 if __name__ == '__main__':
-
-    handle_parameters()
+    run()
