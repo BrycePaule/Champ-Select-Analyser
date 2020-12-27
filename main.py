@@ -55,7 +55,6 @@ def run_scrape_and_scale(download=False):
 
 
 def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None, worksheet=None):
-
     if spreadsheet_URL is None:
         spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ')
         if spreadsheet_URL.isspace() or spreadsheet_URL == '':
@@ -72,7 +71,8 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
 
     for image in matcher.get_champ_select_image(match_all):
         print(f'Working on {image}')
-        ban_results, pick_results = matcher.analyse_champion_select(image)
+        results = matcher.match(image)
+        matcher.print_results(results)
 
         end_timer(time_start)
 
@@ -83,7 +83,6 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
 
 
 def run():
-
     match_all = False
     spreadsheet_URL = None
     worksheet_name = None

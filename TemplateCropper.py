@@ -1,174 +1,101 @@
 import os
 
 from PIL import Image
+import numpy as np
+import cv2 as cv
 
 
-class TemplateCropper():
+class TemplateCropper:
 
     """ Handles cutting template crops from champ select screenshots """
 
     def __init__(self, template_duplicate_count):
         self.champ_select_path = 'D:/Scripts/Python/ChampSelectAnalyser/ChampSelectScreenshots/'
         self.template_path = 'D:/Scripts/Python/ChampSelectAnalyser/Templates/'
-        self.results_path = 'D:/Scripts/Python/ChampSelectAnalyser/Results/'
+
+        self.duplicate_count = template_duplicate_count
+        self.resize_factor = 0.01
 
         self.pick_width = None
         self.pick_height = None
         self.ban_width = None
         self.ban_height = None
 
-        self.pick_coords = self.get_pick_coordinates()
-        self.ban_coords = self.get_ban_coordinates()
-
-        self.duplicate_count = template_duplicate_count
-        self.resize_factor = 0.01
-
+        self.slot_coords = self.build_slot_coords()
 
     """ TEMPLATE CREATION """
 
-    def create_templates(self, champ_select_image):
-        """
-        Main external function call.
+    def create_template(self, champ_select_image, slot, template_number, resize_factor=0.01, bans=False):
+        template_PIL = Image.open( f'{self.champ_select_path}{champ_select_image}')
+        template_PIL = template_PIL.crop(self.slot_coords[slot])
 
-        Uses all other methods to locate, create and save all template crops
-        and duplicates
-        """
+        if template_number == 0:
+            return cv.cvtColor(np.array(template_PIL), cv.COLOR_BGR2GRAY)
 
-        self.clear_stored_templates()
+        width = self.ban_width if bans else self.pick_width
+        height = self.ban_height if bans else self.pick_height
 
-        self.get_crop_coordinates(self.ban_coords, bans=True)
-        self.get_crop_coordinates(self.pick_coords)
-
-        print('Cropper working on: ' + champ_select_image)
-
-        image = Image.open(f'{self.champ_select_path}{champ_select_image}')
-
-        print('                                ... cropping templates')
-        self.crop_templates(image, self.ban_coords)
-        self.crop_templates(image, self.pick_coords)
-
-        print('                                ... making duplicates')
-        self.create_duplicates(self.ban_coords, bans=True)
-        self.create_duplicates(self.pick_coords)
-
-
-    def crop_templates(self, champ_select_image, coordinates):
-        """ Crops and saves templates from the given coordinates """
-
-        for coords in coordinates:
-            cropped_image = champ_select_image.crop(coords[1])
-            cropped_image.save(f'{self.template_path}{coords[0]}.bmp')
-
-
-    def create_duplicates(self, list_of_crops, bans=False):
-        """
-        Creates template duplates resized in self.resize_factor increments.
-
-        Allows for an extra layer of safety, if the champion splash / icon
-        is not perfectly sized, will attempt to match the duplicates before
-        moving on
-        """
-
-        if bans:
-            width = self.ban_width
-            height = self.ban_height
+        if template_number % 2 == 0:
+            new_width = int(width - (width * resize_factor * template_number))
+            new_height = int(height - (height * resize_factor * template_number))
         else:
-            width = self.pick_width
-            height = self.pick_height
+            new_width = int(width + (width * resize_factor * template_number))
+            new_height = int(height + (height * resize_factor * template_number))
 
-        for label, _ in list_of_crops:
-            template = Image.open(f'{self.template_path}{label}.bmp')
+        template_PIL = template_PIL.resize((new_width, new_height))
+        template_CV = cv.cvtColor(np.array(template_PIL), cv.COLOR_BGR2GRAY)
 
-            for i in range(1, self.duplicate_count + 1):
-                sml_width = int(width - (width * ((i + 1) * self.resize_factor)))
-                sml_height = int(height - (height * ((i + 1) * self.resize_factor)))
-                sml_index = str((i * 2) - 1).zfill(2)
-                sml_template = template.resize((sml_width, sml_height))
-                sml_template.save(f'{self.template_path}{label}_{sml_index}.bmp')
-
-                lrg_width = int(width + (width * ((i + 1) * self.resize_factor)))
-                lrg_height = int(height + (height * ((i + 1) * self.resize_factor)))
-                lrg_index = str(i * 2).zfill(2)
-                lrg_template = template.resize((lrg_width, lrg_height))
-                lrg_template.save(f'{self.template_path}{label}_{lrg_index}.bmp')
-
-    """ SETUP """
-
-    def clear_stored_templates(self):
-        """ Clears template directory of any previous templates """
-
-        templates = [f for f in os.listdir(self.template_path) if f.endswith(".bmp")]
-
-        for f in templates:
-            os.remove(os.path.join(self.template_path, f))
+        return template_CV
 
 
     """ CROP COORDINATES """
 
-    def get_ban_coordinates(self):
-        """
-         Generates lists of ban coordinates.
+    def build_slot_coords(self):
+        coords = {
+            # bans
+            'bb1': (40, 980, 110, 1050),
+            'bb2': (130, 980, 200, 1050),
+            'bb3': (220, 980, 290, 1050),
+            'bb4': (315, 980, 385, 1050),
+            'bb5': (408, 980, 478, 1050),
+            'rb1': (1820, 980, 1890, 1050),
+            'rb2': (1725, 980, 1795, 1050),
+            'rb3': (1630, 980, 1700, 1050),
+            'rb4': (1538, 980, 1608, 1050),
+            'rb5': (1445, 980, 1515, 1050),
 
-         These are semi-manual, mostly follow the same pattern, but
-         occasionally change break pattern to allow for accuracy, hence
-         how this is written
-         """
+            # picks
+            'b1': (90, 180, 290, 320),
+            'b2': (90, 335, 290, 475),
+            'b3': (90, 495, 290, 635),
+            'b4': (90, 655, 290, 795),
+            'b5': (90, 655, 290, 795),
+            'r1': (1635, 180, 1835, 320),
+            'r2': (1635, 335, 1835, 475),
+            'r3': (1635, 495, 1835, 635),
+            'r4': (1635, 655, 1835, 795),
+            'r5': (1635, 810, 1835, 950)
+        }
 
-        bb1 = ("bb1", (40, 980, 110, 1050))
-        bb2 = ("bb2", (130, 980, 200, 1050))
-        bb3 = ("bb3", (220, 980, 290, 1050))
-        bb4 = ("bb4", (315, 980, 385, 1050))
-        bb5 = ("bb5", (408, 980, 478, 1050))
-        rb1 = ("rb1", (1820, 980, 1890, 1050))
-        rb2 = ("rb2", (1725, 980, 1795, 1050))
-        rb3 = ("rb3", (1630, 980, 1700, 1050))
-        rb4 = ("rb4", (1538, 980, 1608, 1050))
-        rb5 = ("rb5", (1445, 980, 1515, 1050))
+        self.check_size_consistency(list(coords.values())[:10])
+        self.check_size_consistency(list(coords.values())[10:])
 
-        return [bb1, bb2, bb3, bb4, bb5, rb1, rb2, rb3, rb4, rb5]
+        self.get_crop_measurements(coords)
 
+        return coords
 
-    def get_pick_coordinates(self):
-        """
-         Generates lists of pick coordinates.
-
-         These are semi-manual, mostly follow the same pattern, but
-         occasionally change break pattern to allow for accuracy, hence
-         how this is written
-         """
-
-        b1 = ("b1", (90, 180, 290, 320))
-        b2 = ("b2", (90, 335, 290, 475))
-        b3 = ("b3", (90, 495, 290, 635))
-        b4 = ("b4", (90, 655, 290, 795))
-        b5 = ("b5", (90, 810, 290, 950))
-        r1 = ("r1", (1635, 180, 1835, 320))
-        r2 = ("r2", (1635, 335, 1835, 475))
-        r3 = ("r3", (1635, 495, 1835, 635))
-        r4 = ("r4", (1635, 655, 1835, 795))
-        r5 = ("r5", (1635, 810, 1835, 950))
-
-        return [b1, b2, b3, b4, b5, r1, r2, r3, r4, r5]
-
-
-    def get_crop_coordinates(self, slot_coords_list, bans=False):
+    def get_crop_measurements(self, slot_coords):
         """ Returns the width and height of given selection of templates """
 
-        self.check_edge_size_consistency(slot_coords_list)
+        x1, y1, x2, y2 = slot_coords['bb1']
+        self.ban_width = x2 - x1
+        self.ban_height = y2 - y1
 
-        a, b, c, d = slot_coords_list[0][1]
-        width = (c - a)
-        height = (d - b)
+        x1, y1, x2, y2 = slot_coords['b1']
+        self.pick_width = x2 - x1
+        self.pick_height = y2 - y1
 
-        if bans:
-            self.ban_width = width
-            self.ban_height = height
-        else:
-            self.pick_width = width
-            self.pick_height = height
-
-
-    def check_edge_size_consistency(self, slot_coords_list):
+    def check_size_consistency(self, coord_list):
         """
         Runs through all templates coordinates, checking that they're of
         uniform size.
@@ -176,16 +103,16 @@ class TemplateCropper():
         If they're not all equal, raises exception
         """
 
-        total_width = 0
-        total_height = 0
+        template_width = coord_list
+        template_height = 0
 
-        for index, (pick_slot, slot_coords_list) in enumerate(slot_coords_list):
-            a, b, c, d = slot_coords_list
-            slot_width = (c - a)
-            slot_height = (d - b)
+        for slot in coord_list[1:]:
+            x1, y1, x2, y2 = slot
 
-            total_width += slot_width
-            total_height += slot_height
+            if template_width == 0 or template_height == 0:
+                template_width = x2 - x1
+                template_height = y2 - y1
+                continue
 
-            if total_width / (index + 1) != slot_width:
-                raise Exception(f'{pick_slot} is cropped differently than other coords')
+            if x2 - x1 != template_width or y2 - y1 != template_height:
+                raise Exception(f'Incorrect cropper slot coordinates')
