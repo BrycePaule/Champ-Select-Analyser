@@ -3,7 +3,7 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
 
-class GoogleDriveInterface():
+class GoogleDriveInterface:
 
     """ Handles sending TemplateMatcher results to the given google sheet """
 
@@ -31,29 +31,17 @@ class GoogleDriveInterface():
         row = self.row_start
         col = self.col_start
 
-        self.sheet.update_cell(row, col, (ban_results[0][1]))
-        self.sheet.update_cell(row + 1, col, (ban_results[1][1]))
-        self.sheet.update_cell(row + 2, col, (ban_results[2][1]))
-        self.sheet.update_cell(row + 3, col, (ban_results[3][1]))
-        self.sheet.update_cell(row + 4, col, (ban_results[4][1]))
+        for i in range(5):
+            self.sheet.update_cell(row + i, col, (ban_results[i][1]))
 
-        self.sheet.update_cell(row, col + 1, (pick_results[0][1]))
-        self.sheet.update_cell(row + 1, col + 1, (pick_results[1][1]))
-        self.sheet.update_cell(row + 2, col + 1, (pick_results[2][1]))
-        self.sheet.update_cell(row + 3, col + 1, (pick_results[3][1]))
-        self.sheet.update_cell(row + 4, col + 1, (pick_results[4][1]))
+        for i in range(5):
+            self.sheet.update_cell(row + i, col, (pick_results[i][1]))
 
-        self.sheet.update_cell(row, col + 2, (pick_results[5][1]))
-        self.sheet.update_cell(row + 1, col + 2, (pick_results[6][1]))
-        self.sheet.update_cell(row + 2, col + 2, (pick_results[7][1]))
-        self.sheet.update_cell(row + 3, col + 2, (pick_results[8][1]))
-        self.sheet.update_cell(row + 4, col + 2, (pick_results[9][1]))
+        for i in range(5, 10):
+            self.sheet.update_cell(row + i, col + 2, (ban_results[i][1]))
 
-        self.sheet.update_cell(row, col + 3, (ban_results[5][1]))
-        self.sheet.update_cell(row + 1, col + 3, (ban_results[6][1]))
-        self.sheet.update_cell(row + 2, col + 3, (ban_results[7][1]))
-        self.sheet.update_cell(row + 3, col + 3, (ban_results[8][1]))
-        self.sheet.update_cell(row + 4, col + 3, (ban_results[9][1]))
+        for i in range(5, 10):
+            self.sheet.update_cell(row + i, col + 3, (ban_results[i][1]))
 
         self.row_start += self.row_increment
         self.col_start += self.col_increment

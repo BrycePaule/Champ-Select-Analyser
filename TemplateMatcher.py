@@ -1,12 +1,13 @@
 import os
 import numpy as np
 import cv2 as cv
+from time import sleep
 
 from AccuracyManager import AccuracyManager
 from TemplateCropper import TemplateCropper
 
 
-class TemplateMatcher():
+class TemplateMatcher:
 
     def __init__(self, template_duplicate_count):
         self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
@@ -36,15 +37,14 @@ class TemplateMatcher():
         those to find which slot is which champion, returns results
         """
 
-        self.cropper.create_templates(image)
-
+        TemplateCropper(self.duplicate_count).create_templates(image)
         bans, picks = self.organise_templates()
 
         # bans = self.manual_template_override(bans, 'bb2.bmp')
         # picks = self.manual_template_override(picks, 'r4.bmp')
 
-        ban_results = self.match(bans, bans=True)
-        pick_results = self.match(picks)
+        ban_results = self.match(bans, bans=True, match_accuracy_threshold=.70)
+        pick_results = self.match(picks, match_accuracy_threshold=.93)
 
         self.print_results(ban_results, bans=True)
         self.print_results(pick_results)
@@ -76,7 +76,7 @@ class TemplateMatcher():
         pick_names = ['b1', 'b2', 'b3', 'b4', 'b5', 'r1', 'r2', 'r3', 'r4', 'r5']
         picks = [template for template in all_templates if template[0:2] in pick_names]
         picks = np.array(picks)
-        picks.shape = (10, templates_per_slot)
+        picks.shape = 10, templates_per_slot
 
         ban_names = ['bb1', 'bb2', 'bb3', 'bb4', 'bb5', 'rb1', 'rb2', 'rb3', 'rb4', 'rb5']
         bans = [template for template in all_templates if template[0:3] in ban_names]
@@ -86,7 +86,7 @@ class TemplateMatcher():
         return bans, picks
 
 
-    def match(self, templates, bans=False):
+    def match_old(self, templates, bans=False, match_accuracy=.93):
         """
         Clusterfuck of logic that template matches champ select crops against
         champion splashes and ban icons.
@@ -110,12 +110,9 @@ class TemplateMatcher():
         results = []
 
         if bans:
-            threshold = .70
             image_filepath = self.icon_path
         else:
-            threshold = 0.93
             image_filepath = self.splash_path
-
 
         for row in templates:
             skip_slot = False
@@ -143,7 +140,7 @@ class TemplateMatcher():
                         compare_image = cv.imread(filepath, 0)
 
                         res = cv.matchTemplate(compare_image, template_image, cv.TM_CCOEFF_NORMED)
-                        loc = np.where(res >= threshold)
+                        loc = np.where(res >= match_accuracy)
 
                         for match in zip(*loc[::-1]):
                             match_found = True
@@ -161,6 +158,64 @@ class TemplateMatcher():
 
         return results
 
+    def match(self, templates, bans=False, match_accuracy_threshold=.93):
+        """
+        Returns a list strings containing:
+            image label, champion name, and match counter
+
+        Effectively follows this procedure:
+            - takes a template from the 2D array
+            - steps through every champion in champlist
+            - checks the template against both splash/icon, normal and inverted
+            - if it finds a successful match over the given threshold, it
+              moves onto the next set of templates, skipping all the resized
+              duplicates in that row
+        """
+
+        self.clear_stored_results()
+        result_dict = {slot: None for slot in templates[:, 0]}
+
+        if bans:
+            image_filepath = self.icon_path
+        else:
+            image_filepath = self.splash_path
+
+        for row in templates:
+            champ_select_slot = row[0]
+            template_duplicate = 0
+
+            while result_dict[champ_select_slot] is None:
+                template_label = row[template_duplicate]
+                template_path = f'{self.template_path}{template_label}'
+
+                for champion in self.champlist:
+                    print(f'Matching: {template_label} > {champion}')
+                    matches_default = self.template_match(f'{image_filepath}{champion}.bmp', template_path, match_accuracy_threshold)
+                    matches_inverted = self.template_match(f'{image_filepath}{champion}_inverted.bmp', template_path, match_accuracy_threshold)
+                    best_match = max(matches_default, matches_inverted)
+
+                    if best_match > 0:
+                        print(f'{" " * 20} Match -- {champion} ({best_match})')
+                        result_dict[row[0]] = [template_label, champion, best_match]
+                        sleep(0.5)
+
+                template_duplicate += 1
+                if template_duplicate == len(row):
+                    result_dict[champ_select_slot] = [champ_select_slot, None, 0]
+
+        return list(result_dict.items())
+
+    def template_match(self, image_path, template_path, match_accuracy_threshold):
+        image = cv.imread(image_path, 0)
+        template = cv.imread(template_path, 0)
+
+        res = cv.matchTemplate(image, template, cv.TM_CCOEFF_NORMED)
+
+        reasonable_matches = np.where(res >= match_accuracy_threshold)
+        matches = np.count_nonzero(reasonable_matches) // 2
+        # this is halved, because it's counting both x and y coords of matches, meaning two non-zeros = one match
+
+        return matches
 
     def manual_template_override(self, templates, desired_label):
         """

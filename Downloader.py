@@ -9,7 +9,7 @@ from contextlib import suppress
 from ImageEditor import ImageEditor
 
 
-class Downloader():
+class Downloader:
 
     """
     Scrapes champion list, splash arts and icons from the web, saving them
