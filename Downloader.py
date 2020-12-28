@@ -1,7 +1,6 @@
 import os
 import urllib.request
 
-from PIL import Image, ImageOps
 from bs4 import BeautifulSoup
 from urllib.request import urlopen as uReq
 from contextlib import suppress
@@ -70,7 +69,7 @@ class Downloader:
 
         url = self.splash_url_prefix + name + self.splash_url_suffix
         name = self.convert_to_save_name(name)
-        urllib.request.urlretrieve(url, f'{self.splash_raw_path}{name}.bmp')
+        response = urllib.request.urlretrieve(url, f'{self.splash_raw_path}{name}.bmp')
 
 
     def scrape_icon(self, name):

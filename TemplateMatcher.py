@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import cv2 as cv
-from time import sleep
 
 from AccuracyManager import AccuracyManager
 from TemplateCropper import TemplateCropper
@@ -77,7 +76,10 @@ class TemplateMatcher:
                 template = self.cropper.create_template(champ_select_image_number, slot, template_number)
 
                 for champion in self.champlist:
-                    print(f'Matching: {slot} > {champion}')
+                    print(f'Matching: {slot} (attempt {template_number + 1}) > {champion}')
+
+                    if not os.path.exists(f'{image_filepath}{champion}.bmp'):
+                        raise Exception(f'{champion} does not have a downloaded image.')
 
                     champ_image = cv.imread(f'{image_filepath}{champion}.bmp', 0)
                     matches_default = self.template_match(champ_image, template, match_accuracy_threshold)
@@ -90,14 +92,13 @@ class TemplateMatcher:
                     if best_match > 0:
                         print(f'{" " * 20} Match -- {champion} ({best_match})')
                         results[slot] = (champion, best_match)
-                        # sleep(0.5)
                         break
 
                 # break case - if already found a match
                 if results[slot] is not None:
                     break
 
-            if slot == self.champ_select_slots[-1]:
+            if results[slot] is None:
                 results[slot] = (None, 0)
 
         return results
@@ -136,6 +137,7 @@ class TemplateMatcher:
         """ Print results to console. """
 
         bans = list(results.values())[:10]
+        print(bans)
         bans = [('x', 0) if result[0] is None else result for result in bans]
         bans = zip(bans[:5], bans[5:])
 

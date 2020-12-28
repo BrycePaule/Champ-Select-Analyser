@@ -1,7 +1,6 @@
 import time
 import datetime
 import sys
-import random
 
 from Downloader import Downloader
 from ImageEditor import ImageEditor
@@ -79,7 +78,7 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
         if spreadsheet_URL is not None:
             print('Sending results to Google Sheet ... ')
             GDI = GoogleDriveInterface(spreadsheet_URL, worksheet)
-            GDI.output_to_LCK_sheet(ban_results, pick_results)
+            GDI.output_to_LCK_sheet(results)
 
 
 def run():

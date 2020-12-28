@@ -26,11 +26,11 @@ class TemplateCropper:
     """ TEMPLATE CREATION """
 
     def create_template(self, champ_select_image, slot, template_number, resize_factor=0.01, bans=False):
-        template_PIL = Image.open( f'{self.champ_select_path}{champ_select_image}')
+        template_PIL = Image.open(f'{self.champ_select_path}{champ_select_image}')
         template_PIL = template_PIL.crop(self.slot_coords[slot])
 
         if template_number == 0:
-            return cv.cvtColor(np.array(template_PIL), cv.COLOR_BGR2GRAY)
+            return cv.cvtColor(np.array(template_PIL), cv.COLOR_RGB2GRAY)
 
         width = self.ban_width if bans else self.pick_width
         height = self.ban_height if bans else self.pick_height
