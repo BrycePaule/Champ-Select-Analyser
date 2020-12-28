@@ -10,8 +10,7 @@ class TemplateCropper:
     """ Handles cutting template crops from champ select screenshots """
 
     def __init__(self, template_duplicate_count):
-        self.champ_select_path = 'D:/Scripts/Python/ChampSelectAnalyser/ChampSelectScreenshots/'
-        self.template_path = 'D:/Scripts/Python/ChampSelectAnalyser/Templates/'
+        self.champ_select_path = f'{os.getcwd()}/ChampSelectScreenshots/'
 
         self.duplicate_count = template_duplicate_count
         self.resize_factor = 0.01
@@ -69,7 +68,7 @@ class TemplateCropper:
             'b2': (90, 335, 290, 475),
             'b3': (90, 495, 290, 635),
             'b4': (90, 655, 290, 795),
-            'b5': (90, 655, 290, 795),
+            'b5': (90, 810, 290, 950),
             'r1': (1635, 180, 1835, 320),
             'r2': (1635, 335, 1835, 475),
             'r3': (1635, 495, 1835, 635),
@@ -79,21 +78,9 @@ class TemplateCropper:
 
         self.check_size_consistency(list(coords.values())[:10])
         self.check_size_consistency(list(coords.values())[10:])
-
         self.get_crop_measurements(coords)
 
         return coords
-
-    def get_crop_measurements(self, slot_coords):
-        """ Returns the width and height of given selection of templates """
-
-        x1, y1, x2, y2 = slot_coords['bb1']
-        self.ban_width = x2 - x1
-        self.ban_height = y2 - y1
-
-        x1, y1, x2, y2 = slot_coords['b1']
-        self.pick_width = x2 - x1
-        self.pick_height = y2 - y1
 
     def check_size_consistency(self, coord_list):
         """
@@ -116,3 +103,14 @@ class TemplateCropper:
 
             if x2 - x1 != template_width or y2 - y1 != template_height:
                 raise Exception(f'Incorrect cropper slot coordinates')
+
+    def get_crop_measurements(self, slot_coords):
+        """ Returns the width and height of given selection of templates """
+
+        x1, y1, x2, y2 = slot_coords['bb1']
+        self.ban_width = x2 - x1
+        self.ban_height = y2 - y1
+
+        x1, y1, x2, y2 = slot_coords['b1']
+        self.pick_width = x2 - x1
+        self.pick_height = y2 - y1

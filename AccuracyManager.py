@@ -1,6 +1,6 @@
 import os
 
-class AccuracyManager():
+class AccuracyManager:
 
     """
     Handles tracking the TemplateMatchers accuracy.  Useful in determining
@@ -9,10 +9,10 @@ class AccuracyManager():
     """
 
     def __init__(self):
-        self.accuracy_filepath_picks = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_splash.txt/'
-        self.accuracy_filepath_bans = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_icons.txt/'
+        self.accuracy_filepath_picks = f'{os.getcwd()}/Accuracy/accuracy_splash.txt/'
+        self.accuracy_filepath_bans = f'{os.getcwd()}/Accuracy/accuracy_icons.txt/'
 
-        self.champlist_path = 'D:/Scripts/Python/ChampSelectAnalyser/champlist.txt/'
+        self.champlist_path = f'{os.getcwd()}/champlist.txt/'
         self.champlist = self.import_champlist()
 
         self.low_accuracy_threshold_picks = 10

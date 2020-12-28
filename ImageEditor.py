@@ -1,3 +1,5 @@
+import os
+
 from PIL import Image, ImageOps, ImageChops, ImageDraw, ImageEnhance
 
 
@@ -315,12 +317,12 @@ class ImageEditor:
     """
 
     def __init__(self):
-        self.splash_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes_Raw/'
-        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
-        self.icon_raw_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons_Raw/'
-        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons/'
-        self.manual_override_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Manual_Image_Overrides/'
-        self.champlist_path = 'D:/Scripts/Python/ChampSelectAnalyser/champlist.txt'
+        self.splash_raw_path = f'{os.getcwd()}/Assets/Splashes_Raw/'
+        self.splash_path = f'{os.getcwd()}/Assets/Splashes/'
+        self.icon_raw_path = f'{os.getcwd()}/Assets/Icons_Raw/'
+        self.icon_path = f'{os.getcwd()}/Assets/Icons/'
+        self.manual_override_path = f'{os.getcwd()}/Assets/Manual_Image_Overrides/'
+        self.champlist_path = f'{os.getcwd()}/champlist.txt'
 
         self.champlist = self.import_champlist()
         self.check_missing_champions()

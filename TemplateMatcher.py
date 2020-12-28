@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import cv2 as cv
+import time
 
 from AccuracyManager import AccuracyManager
 from TemplateCropper import TemplateCropper
@@ -9,16 +10,16 @@ from TemplateCropper import TemplateCropper
 class TemplateMatcher:
 
     def __init__(self, template_duplicate_count):
-        self.splash_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Splashes/'
-        self.icon_path = 'D:/Scripts/Python/ChampSelectAnalyser/Assets/Icons/'
+        self.splash_path = f'{os.getcwd()}/Assets/Splashes/'
+        self.icon_path = f'{os.getcwd()}/Assets/Icons/'
 
-        self.champlist_path = 'D:/Scripts/Python/ChampSelectAnalyser/champlist.txt/'
-        self.champ_select_path = 'D:/Scripts/Python/ChampSelectAnalyser/ChampSelectScreenshots/'
-        self.template_path = 'D:/Scripts/Python/ChampSelectAnalyser/Templates/'
-        self.results_path = 'D:/Scripts/Python/ChampSelectAnalyser/Results/'
+        self.champlist_path = f'{os.getcwd()}/champlist.txt/'
+        self.champ_select_path = f'{os.getcwd()}/ChampSelectScreenshots/'
+        self.template_path = f'{os.getcwd()}/Templates/'
+        self.results_path = f'{os.getcwd()}/Results/'
 
-        self.accuracy_filepath_picks = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_splash.txt/'
-        self.accuracy_filepath_bans = 'D:/Scripts/Python/ChampSelectAnalyser/Accuracy/accuracy_icons.txt/'
+        self.accuracy_filepath_picks = f'{os.getcwd()}/Accuracy/accuracy_splash.txt/'
+        self.accuracy_filepath_bans = f'{os.getcwd()}/Accuracy/accuracy_icons.txt/'
 
         self.champlist = self.import_champlist()
         self.duplicate_count = template_duplicate_count
@@ -45,7 +46,6 @@ class TemplateMatcher:
         else:
             return [[f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")][-1]]
 
-
     def match(self, champ_select_image_number):
         """
         Returns a dict of match results:
@@ -65,9 +65,12 @@ class TemplateMatcher:
 
         for slot in self.champ_select_slots:
 
+            # if bans
             if len(slot) == 3:
                 match_accuracy_threshold = 0.70
                 image_filepath = self.icon_path
+
+            # if picks
             else:
                 match_accuracy_threshold = 0.93
                 image_filepath = self.splash_path
@@ -137,7 +140,6 @@ class TemplateMatcher:
         """ Print results to console. """
 
         bans = list(results.values())[:10]
-        print(bans)
         bans = [('x', 0) if result[0] is None else result for result in bans]
         bans = zip(bans[:5], bans[5:])
 
