@@ -33,7 +33,9 @@ def run_scrape_and_scale(download=False):
         DL = Downloader()
 
         DL.check_for_directory(DL.splash_raw_path, DL.splash_raw_directory_name)
+        DL.check_for_directory(DL.splash_path, DL.splash_directory_name)
         DL.check_for_directory(DL.icon_raw_path, DL.icon_raw_directory_name)
+        DL.check_for_directory(DL.icon_path, DL.icon_directory_name)
 
         DL.scrape_champlist_raw()
         DL.convert_champlist_to_save()
@@ -86,6 +88,9 @@ def run():
     match_all = False
     spreadsheet_URL = None
     worksheet_name = None
+
+    if not os.path.exists(f'{os.getcwd()}/Assets'):
+        os.mkdir('Assets')
 
     if len(sys.argv) >= 2:
         if '-d' in sys.argv or '-download' in sys.argv:

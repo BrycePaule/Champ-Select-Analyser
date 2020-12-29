@@ -27,8 +27,7 @@ class Downloader:
         self.icon_directory_name = 'Icons'
         self.icon_raw_directory_name = 'Icons_Raw'
 
-        self.splash_path = f'{os.getcwd()}/{self.splash_directory_name}/'
-        print()
+        self.splash_path = f'{os.getcwd()}/Assets/{self.splash_directory_name}/'
         self.icon_path = f'{os.getcwd()}/Assets/{self.icon_directory_name}/'
         self.splash_raw_path = f'{os.getcwd()}/Assets/{self.splash_raw_directory_name}/'
         self.icon_raw_path = f'{os.getcwd()}/Assets/{self.icon_raw_directory_name}/'
