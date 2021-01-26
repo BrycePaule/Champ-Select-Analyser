@@ -15,7 +15,7 @@ class Widget(QWidget):
 
         tab_widget = QTabWidget()
         tab_widget.addTab(self.dashboard, '&Dashboard')
-        tab_widget.addTab(self.settings, '&Config')
+        tab_widget.addTab(self.settings, '&Settings')
 
 
         self.overall_layout = QGridLayout()
@@ -28,7 +28,6 @@ class Widget(QWidget):
 
     def create_dashboard(self):
         self.dashboard = QGroupBox('Dashboard')
-
 
     def create_settings(self):
         self.settings = QGroupBox('Region')
