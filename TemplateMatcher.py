@@ -58,6 +58,7 @@ class TemplateMatcher:
             - if it finds a successful match over the given threshold, it
               moves onto the next set of templates, skipping all the resized
               duplicates in that row
+            - otherwise it resizes the template, and continues matching
         """
 
         self.clear_stored_results()
