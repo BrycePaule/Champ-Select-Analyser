@@ -16,10 +16,10 @@ class Widget(QWidget):
 
         self.dirModel = QFileSystemModel()
         self.dirModel.setRootPath(QDir.rootPath())
-        self.dirModel.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
+        # self.dirModel.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
 
         self.fileModel = QFileSystemModel()
-        self.fileModel.setFilter(QDir.NoDotAndDotDot |  QDir.Files)
+        # self.fileModel.setFilter(QDir.NoDotAndDotDot | QDir.Files)
 
         self.treeview.setModel(self.dirModel)
         self.listview.setModel(self.fileModel)
