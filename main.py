@@ -1,27 +1,11 @@
-import time
-import datetime
 import sys
-import os
 
 from Scraper import Scraper
 from ImageEditor import ImageEditor
 from TemplateMatcher import TemplateMatcher
 from GoogleDriveInterface import GoogleDriveInterface
+from Utils import start_timer, end_timer
 
-
-""" TIMERS """
-
-def start_timer():
-    return time.perf_counter()
-
-
-def end_timer(time_start):
-    time_stop = time.perf_counter()
-    elapsed_time = str(datetime.timedelta(seconds=time_stop - time_start, ))
-
-    print('\n-----------------------')
-    print(f'Runtime: {elapsed_time}')
-    print('-----------------------')
 
 
 """ CHAMP SELECT ANALYSER"""
@@ -43,8 +27,6 @@ def run_scrape_and_scale(download=False):
         print(f'Fixing   ...   {name}')
         IEdit.splash_complete_fix(name)
         IEdit.icon_complete_fix(name)
-
-    end_timer(time_start)
 
 
 def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None, worksheet=None):
@@ -76,13 +58,13 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
 
 
 def run():
+
+    # Defaults
     _match_all = False
     _spreadsheet_URL = None
     _worksheet_name = None
 
-    if not os.path.exists(f'{os.getcwd()}/Assets'):
-        os.mkdir('Assets')
-
+    # Parse command line args
     if len(sys.argv) >= 2:
         if '-d' in sys.argv or '-download' in sys.argv:
             run_scrape_and_scale(download=True)
@@ -115,5 +97,10 @@ def run():
 
 
 if __name__ == '__main__':
+
+    timer = start_timer()
+
     # run()
     run_scrape_and_scale(download=True)
+
+    end_timer(timer)
