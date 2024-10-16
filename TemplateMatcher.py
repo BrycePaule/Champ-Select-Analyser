@@ -1,7 +1,6 @@
 import os
 import numpy as np
 import cv2 as cv
-import time
 
 from AccuracyManager import AccuracyManager
 from TemplateCropper import TemplateCropper
@@ -10,16 +9,16 @@ from TemplateCropper import TemplateCropper
 class TemplateMatcher:
 
     def __init__(self, template_duplicate_count):
-        self.splash_path = f'{os.getcwd()}/Assets/Splashes/'
-        self.icon_path = f'{os.getcwd()}/Assets/Icons/'
+        self.splash_path = f'./Assets/Splashes/'
+        self.icon_path = f'./Assets/Icons/'
 
-        self.champlist_path = f'{os.getcwd()}/champlist.txt/'
-        self.champ_select_path = f'{os.getcwd()}/ChampSelectScreenshots/'
-        self.template_path = f'{os.getcwd()}/Templates/'
-        self.results_path = f'{os.getcwd()}/Results/'
+        self.champlist_path = f'champlist.txt'
+        self.champ_select_path = f'./ChampSelectScreenshots/'
+        self.template_path = f'./Templates/'
+        self.results_path = f'./Results/'
 
-        self.accuracy_filepath_picks = f'{os.getcwd()}/Accuracy/accuracy_splash.txt/'
-        self.accuracy_filepath_bans = f'{os.getcwd()}/Accuracy/accuracy_icons.txt/'
+        self.accuracy_filepath_picks = f'./Accuracy/accuracy_splash.txt/'
+        self.accuracy_filepath_bans = f'./Accuracy/accuracy_icons.txt/'
 
         self.champlist = self.import_champlist()
         self.duplicate_count = template_duplicate_count
@@ -32,6 +31,8 @@ class TemplateMatcher:
             'r1', 'r2', 'r3', 'r4', 'r5',
         ]
 
+        self.init_directories()
+
 
     """ TEMPLATE MATCHING """
 
@@ -40,6 +41,9 @@ class TemplateMatcher:
         Returns the latest champ select screenshot, or a list of all
         screenshots in the directory if all=True
         """
+
+        if (not os.path.exists(self.champ_select_path)):
+            os.mkdir(self.champ_select_path)
 
         if all_templates:
             return (f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp"))
@@ -98,7 +102,6 @@ class TemplateMatcher:
                         results[slot] = (champion, best_match)
                         break
 
-                # break case - if already found a match
                 if results[slot] is not None:
                     break
 
@@ -133,6 +136,16 @@ class TemplateMatcher:
 
         accuracy_manager = AccuracyManager()
         accuracy_manager.update_accuracy_file(results, bans)
+
+    def init_directories(self):
+        os.makedirs('./Assets/Splashes/', exist_ok = True)
+        os.makedirs('./Assets/Icons/', exist_ok = True)
+        os.makedirs('champlist.txt', exist_ok = True)
+        os.makedirs('./ChampSelectScreenshots/', exist_ok = True)
+        os.makedirs('./Templates/', exist_ok = True)
+        os.makedirs('./Results/', exist_ok = True)
+        os.makedirs('./Accuracy/accuracy_splash.txt/', exist_ok = True)
+        os.makedirs('./Accuracy/accuracy_icons.txt/', exist_ok = True)
 
 
     """ OUTPUT """

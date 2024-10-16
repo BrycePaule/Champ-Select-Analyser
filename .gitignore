@@ -127,3 +127,13 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# Individual changes
+*.bmp
+*.png
+*.jpg
+
+!Manual_Image_Overrides/*.bmp
+!Manual_Image_Overrides/*.png
+!Manual_Image_Overrides/*.jpg

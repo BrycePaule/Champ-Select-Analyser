@@ -3,7 +3,7 @@ import datetime
 import sys
 import os
 
-from Downloader import Downloader
+from Scraper import Scraper
 from ImageEditor import ImageEditor
 from TemplateMatcher import TemplateMatcher
 from GoogleDriveInterface import GoogleDriveInterface
@@ -30,22 +30,13 @@ def run_scrape_and_scale(download=False):
     time_start = time.perf_counter()
 
     if download:
-        DL = Downloader()
+        DL = Scraper()
+        DL.scrape_champlist()
 
-        DL.check_for_directory(DL.splash_raw_path, DL.splash_raw_directory_name)
-        DL.check_for_directory(DL.splash_path, DL.splash_directory_name)
-        DL.check_for_directory(DL.icon_raw_path, DL.icon_raw_directory_name)
-        DL.check_for_directory(DL.icon_path, DL.icon_directory_name)
-
-        DL.scrape_champlist_raw()
-        DL.convert_champlist_to_save()
-        DL.convert_champlist_to_splash()
-        DL.convert_champlist_to_icon()
-
-        for index, name in enumerate(DL.champlist_save):
+        for _, name in enumerate(DL.champlist):
             print(f'Downloading   ...   {name}')
-            DL.scrape_splash(DL.champlist_splash[index])
-            DL.scrape_icon(DL.champlist_icon[index])
+            DL.scrape_splash(name, force=False)
+            DL.scrape_icon(name, force_scrape=False)
 
     IEdit = ImageEditor()
     for name in IEdit.champlist:
@@ -85,9 +76,9 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
 
 
 def run():
-    match_all = False
-    spreadsheet_URL = None
-    worksheet_name = None
+    _match_all = False
+    _spreadsheet_URL = None
+    _worksheet_name = None
 
     if not os.path.exists(f'{os.getcwd()}/Assets'):
         os.mkdir('Assets')
@@ -102,7 +93,7 @@ def run():
             return
 
         if '-a' in sys.argv or '-all' in sys.argv:
-            match_all = True
+            _match_all = True
 
             if '-a' in sys.argv:
                 sys.argv.remove('-a')
@@ -110,18 +101,19 @@ def run():
                 sys.argv.remove('-all')
 
         if len(sys.argv) >= 3:
-            spreadsheet_URL = sys.argv[1]
-            worksheet_name = sys.argv[2]
+            _spreadsheet_URL = sys.argv[1]
+            _worksheet_name = sys.argv[2]
 
             if len(sys.argv) >= 4:
-                worksheet_name = ' '.join(sys.argv[2:])
+                _worksheet_name = ' '.join(sys.argv[2:])
 
     run_crop_and_match(
-        match_all=match_all,
-        spreadsheet_URL=spreadsheet_URL,
-        worksheet=worksheet_name,
+        match_all = _match_all,
+        spreadsheet_URL = _spreadsheet_URL,
+        worksheet = _worksheet_name,
     )
 
 
 if __name__ == '__main__':
-    run()
+    # run()
+    run_scrape_and_scale(download=True)

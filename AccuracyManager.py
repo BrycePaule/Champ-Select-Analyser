@@ -9,10 +9,9 @@ class AccuracyManager:
     """
 
     def __init__(self):
-        self.accuracy_filepath_picks = f'{os.getcwd()}/Accuracy/accuracy_splash.txt/'
-        self.accuracy_filepath_bans = f'{os.getcwd()}/Accuracy/accuracy_icons.txt/'
+        self.accuracy_filepath_picks = f'./Accuracy/accuracy_splash.txt/'
+        self.accuracy_filepath_bans = f'./Accuracy/accuracy_icons.txt/'
 
-        self.champlist_path = f'{os.getcwd()}/champlist.txt/'
         self.champlist = self.import_champlist()
 
         self.low_accuracy_threshold_picks = 10
@@ -52,7 +51,7 @@ class AccuracyManager:
 
 
     def create_default_accuracy_file(self, bans=False):
-        """ Creates a default accuracy file """
+        #  Creates a default accuracy file 
 
         if bans:
             accuracy_filepath = self.accuracy_filepath_bans
@@ -65,7 +64,7 @@ class AccuracyManager:
 
 
     def print_unknown_accuracy(self, bans=False):
-        """ Prints a list of champs with unknown accuracy to console.  """
+        #  Prints a list of champs with unknown accuracy to console.  
 
         if bans:
             accuracy_filepath = self.accuracy_filepath_bans
@@ -88,7 +87,7 @@ class AccuracyManager:
 
 
     def print_low_accuracy(self, bans=False):
-        """ Prints a list of champs with low accuracy to console.  """
+        #  Prints a list of champs with low accuracy to console.  
 
         if bans:
             accuracy_filepath = self.accuracy_filepath_bans
@@ -112,8 +111,3 @@ class AccuracyManager:
         print(f'\nTotal: {len(lows)} champs with low accuracy')
 
 
-    def import_champlist(self):
-        """ Imports champlist from file. """
-
-        with open(self.champlist_path, 'r') as f:
-            return [name.strip() for name in f]

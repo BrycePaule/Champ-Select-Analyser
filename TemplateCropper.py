@@ -10,7 +10,7 @@ class TemplateCropper:
     """ Handles cutting template crops from champ select screenshots """
 
     def __init__(self, template_duplicate_count):
-        self.champ_select_path = f'{os.getcwd()}/ChampSelectScreenshots/'
+        self.champ_select_path = f'./ChampSelectScreenshots/'
 
         self.duplicate_count = template_duplicate_count
         self.resize_factor = 0.01
