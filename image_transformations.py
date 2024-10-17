@@ -1,8 +1,8 @@
 from collections import namedtuple
 
-ImageTransformation = namedtuple('Scale', ['splash_scale', 'icon_scale', 'crop_coords'])
+ImageTransformation = namedtuple('Transformations', ['splash_scale', 'icon_scale', 'crop_coords'])
 
-image_transformations = {
+IMAGE_TRANSFORMATIONS = {
     'Aatrox': ImageTransformation(1.03, 0.80, (600, 000, 1100, 500)),
     'Ahri': ImageTransformation(1.00, 0.80, (500, 000, 1000, 500)),
     'Akali': ImageTransformation(1.01, 0.88, (400, 000, 900, 500)),

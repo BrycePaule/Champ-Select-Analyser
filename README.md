@@ -4,11 +4,11 @@ A command line tool (CLI) to parse LCK champion select / draft screenshots into 
 
 i.e. converts this:
 
-<img src='READMEImages\DraftMarkup.jpg' height=200> 
+<img src='.\ReadMe\DraftMarkup.jpg' height=200> 
 
 into this:
 
-<img src='READMEImages\OutputExample.jpg' height=200>
+<img src='.\ReadMe\OutputExample.jpg' height=200>
 
 
 ## Functionality

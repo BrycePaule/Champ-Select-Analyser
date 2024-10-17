@@ -8,9 +8,6 @@ from TemplateMatcher import TemplateMatcher
 from GoogleDriveInterface import GoogleDriveInterface
 
 
-
-""" CHAMP SELECT ANALYSER"""
-
 def scrape_images(force_scrape=False):
     scraper = Scraper()
     scraper.scrape_champlist()
@@ -28,24 +25,28 @@ def optimise_scraped_images():
         editor.optimise_splashes(name)
         editor.optimise_icons(name)
 
-def run_crop_and_match(duplicate_count=3, match_all=False):
+def parse_screenshots(resize_attempts_before_skip=5, match_all=False):
+
+    # ===================================================================================
+    # No longer have access to the google sheet, likely obsolete and won't be re-used
 
     # Remote save info
-    spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ').strip()
-    worksheet_name = input('Enter worksheet name (enter to skip): ').strip()
+    # spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ').strip()
+    # worksheet_name = input('Enter worksheet name (enter to skip): ').strip()
+    # ===================================================================================
 
     # Run image parser
-    matcher = TemplateMatcher(duplicate_count)
+    matcher = TemplateMatcher(resize_attempts_before_skip)
 
-    for image in matcher.get_champ_select_image(match_all):
-        print(f'Matching {image}')
-        results = matcher.match(image)
+    for draft_filename in matcher.get_draft_screenshot(match_all):
+        print(f'Matching {draft_filename}')
+        results = matcher.parse(draft_filename)
         matcher.print_results(results)
 
-        if spreadsheet_URL is not None:
-            print('Sending results to Google Sheet ... ')
-            GDI = GoogleDriveInterface(spreadsheet_URL, worksheet_name)
-            GDI.output_to_LCK_sheet(results)
+        # if spreadsheet_URL:
+        #     print('Sending results to Google Sheet ... ')
+        #     GDI = GoogleDriveInterface(spreadsheet_URL, worksheet_name)
+        #     GDI.output_to_LCK_sheet(results)
 
 
 def run():
@@ -63,30 +64,19 @@ def run():
         if arg == '-s' or arg == '-scrape':
             _run_scraper = True
 
-        if arg == '-fs' or arg == '-forcescrape':
+        if arg == '-fs' or arg == '-force_scrape':
             _run_scraper = True
             _force_scrape = True
 
         if arg == '-o' or arg == '-optimise':
             _optimise_scraped_images = True
 
-        if arg == '-nm' or arg == '-nomatch':
+        if arg == '-np' or arg == '-no_parse':
             _run_matcher = False
 
         if arg == '-a' or arg == '-all':
             _run_matcher = True
             _match_all = True
-
-
-    # TEMP TESTING -------------------------------------
-    # TEMP TESTING -------------------------------------
-
-    _run_scraper = True
-    # _force_scrape = True
-    _optimise_scraped_images = True
-
-    # TEMP TESTING -------------------------------------
-    # TEMP TESTING -------------------------------------
 
 
     # Create required directories
@@ -96,8 +86,8 @@ def run():
     os.makedirs(Utils.path_icons_raw, exist_ok=True)
 
     os.makedirs(Utils.path_manual_image_overrides, exist_ok=True)
-
     os.makedirs(Utils.path_draft_screenshots, exist_ok=True)
+
     os.makedirs(Utils.path_templates, exist_ok=True)
     os.makedirs(Utils.path_results, exist_ok=True)
 
@@ -110,7 +100,7 @@ def run():
         optimise_scraped_images()
 
     if _run_matcher:
-        run_crop_and_match(_match_all)
+        parse_screenshots(match_all=_match_all)
 
 
 if __name__ == '__main__':

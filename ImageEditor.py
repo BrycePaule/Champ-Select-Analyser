@@ -3,7 +3,7 @@ import Utils
 
 from PIL import Image, ImageOps, ImageChops, ImageDraw, ImageEnhance
 
-from image_transformations import image_transformations
+from IMAGE_TRANSFORMATIONS import IMAGE_TRANSFORMATIONS
 
 
 class ImageEditor:
@@ -50,10 +50,10 @@ class ImageEditor:
 
 
     def splash_resize(self, champ_name, splash):
-        if champ_name not in image_transformations:
+        if champ_name not in IMAGE_TRANSFORMATIONS:
             return splash
 
-        scale_factor = image_transformations[champ_name].splash_scale
+        scale_factor = IMAGE_TRANSFORMATIONS[champ_name].splash_scale
 
         if scale_factor == 1.00:
             return splash
@@ -147,15 +147,15 @@ class ImageEditor:
 
 
     def splash_crop(self, champ_name, splash):
-        if not champ_name in image_transformations:
+        if not champ_name in IMAGE_TRANSFORMATIONS:
             return splash
         
-        if not image_transformations[champ_name].crop_coords != None:
+        if not IMAGE_TRANSFORMATIONS[champ_name].crop_coords != None:
             return splash
         
         Utils.print_indented(' - cropping splash')
 
-        coords = image_transformations[champ_name].crop_coords
+        coords = IMAGE_TRANSFORMATIONS[champ_name].crop_coords
         if (coords[2] == 'w'):
             coords = (coords[0], coords[1], splash.size[0], coords[3])
 
@@ -166,10 +166,10 @@ class ImageEditor:
 
 
     def icon_resize(self, champ_name, icon):
-        if champ_name not in image_transformations:
+        if champ_name not in IMAGE_TRANSFORMATIONS:
             return icon
 
-        scale_factor = image_transformations[champ_name].icon_scale
+        scale_factor = IMAGE_TRANSFORMATIONS[champ_name].icon_scale
 
         if scale_factor == 1.00:
             return icon
@@ -214,6 +214,6 @@ class ImageEditor:
 
 
     def check_missing_champions(self):
-        missing = [champ for champ in Utils.read_champlist_from_file() if champ not in image_transformations]
+        missing = [champ for champ in Utils.read_champlist_from_file() if champ not in IMAGE_TRANSFORMATIONS]
         print('----')
         print(f'\nMissing champion settings: {missing}')
