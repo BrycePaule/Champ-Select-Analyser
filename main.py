@@ -1,46 +1,40 @@
 import sys
+import Utils
 
 from Scraper import Scraper
 from ImageEditor import ImageEditor
 from TemplateMatcher import TemplateMatcher
 from GoogleDriveInterface import GoogleDriveInterface
-from Utils import start_timer, end_timer
 
 
 
 """ CHAMP SELECT ANALYSER"""
 
-def run_scrape_and_scale(download=False):
-    time_start = time.perf_counter()
+def scrape_images(force_scrape=False):
+    scraper = Scraper()
+    scraper.scrape_champlist()
 
-    if download:
-        DL = Scraper()
-        DL.scrape_champlist()
+    for name in scraper.champlist:
+        print(f'Downloading   ...   {name}')
+        scraper.scrape_champ_splashes(name, force_scrape)
+        scraper.scrape_champ_icons(name, force_scrape)
 
-        for _, name in enumerate(DL.champlist):
-            print(f'Downloading   ...   {name}')
-            DL.scrape_splash(name, force=False)
-            DL.scrape_icon(name, force_scrape=False)
+def optimise_scraped_images():
+    editor = ImageEditor()
 
-    IEdit = ImageEditor()
-    for name in IEdit.champlist:
+    for name in editor.champlist:
         print(f'Fixing   ...   {name}')
-        IEdit.splash_complete_fix(name)
-        IEdit.icon_complete_fix(name)
+        editor.optimise_splashes(name)
+        editor.optimise_icons(name)
 
+def run_crop_and_match(duplicate_count=3, match_all=False):
+    spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ')
+    if spreadsheet_URL.isspace() or spreadsheet_URL == '':
+        spreadsheet_URL = None
 
-def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None, worksheet=None):
-    if spreadsheet_URL is None:
-        spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ')
-        if spreadsheet_URL.isspace() or spreadsheet_URL == '':
-            spreadsheet_URL = None
-
-    if worksheet is None:
-        worksheet = input('Enter worksheet name (enter to skip): ')
-        if worksheet.isspace() or worksheet == '':
-            worksheet = None
-
-    time_start = time.perf_counter()
+    worksheet_name = input('Enter worksheet name (enter to skip): ')
+    if worksheet_name.isspace() or worksheet_name == '':
+        worksheet_name = None
 
     matcher = TemplateMatcher(duplicate_count)
 
@@ -49,58 +43,65 @@ def run_crop_and_match(duplicate_count=3, match_all=False, spreadsheet_URL=None,
         results = matcher.match(image)
         matcher.print_results(results)
 
-        end_timer(time_start)
-
         if spreadsheet_URL is not None:
             print('Sending results to Google Sheet ... ')
-            GDI = GoogleDriveInterface(spreadsheet_URL, worksheet)
+            GDI = GoogleDriveInterface(spreadsheet_URL, worksheet_name)
             GDI.output_to_LCK_sheet(results)
 
 
 def run():
+    # Default settings
+    _run_scraper = False
+    _force_scrape = False
 
-    # Defaults
+    _optimise_scraped_images = False
+
+    _run_matcher = True
     _match_all = False
-    _spreadsheet_URL = None
-    _worksheet_name = None
 
     # Parse command line args
-    if len(sys.argv) >= 2:
-        if '-d' in sys.argv or '-download' in sys.argv:
-            run_scrape_and_scale(download=True)
-        elif '-e' in sys.argv or '-edit' in sys.argv:
-            run_scrape_and_scale()
+    for arg in sys.argv:
+        if arg == '-s' or arg == '-scrape':
+            _run_scraper = True
 
-        if '-nm' in sys.argv or '-nomatch' in sys.argv:
-            return
+        if arg == '-fs' or arg == '-forcescrape':
+            _run_scraper = True
+            _force_scrape = True
 
-        if '-a' in sys.argv or '-all' in sys.argv:
+        if arg == '-o' or arg == '-optimise':
+            _optimise_scraped_images = True
+
+        if arg == '-nm' or arg == '-nomatch':
+            _run_matcher = False
+
+        if arg == '-a' or arg == '-all':
+            _run_matcher = True
             _match_all = True
 
-            if '-a' in sys.argv:
-                sys.argv.remove('-a')
-            if '-all' in sys.argv:
-                sys.argv.remove('-all')
 
-        if len(sys.argv) >= 3:
-            _spreadsheet_URL = sys.argv[1]
-            _worksheet_name = sys.argv[2]
+    # TEMP TESTING -------------------------------------
+    # TEMP TESTING -------------------------------------
 
-            if len(sys.argv) >= 4:
-                _worksheet_name = ' '.join(sys.argv[2:])
+    _run_scraper = True
+    _force_scrape = True
+    _optimise_scraped_images = True
 
-    run_crop_and_match(
-        match_all = _match_all,
-        spreadsheet_URL = _spreadsheet_URL,
-        worksheet = _worksheet_name,
-    )
+    # TEMP TESTING -------------------------------------
+    # TEMP TESTING -------------------------------------
+
+
+    # Run app
+    if _run_scraper:
+        scrape_images(_force_scrape)
+
+    if _optimise_scraped_images:
+        optimise_scraped_images()
+
+    if _run_matcher:
+        run_crop_and_match(_match_all)
 
 
 if __name__ == '__main__':
-
-    timer = start_timer()
-
-    # run()
-    run_scrape_and_scale(download=True)
-
-    end_timer(timer)
+    timer = Utils.start_timer()
+    run()
+    Utils.end_timer(timer)

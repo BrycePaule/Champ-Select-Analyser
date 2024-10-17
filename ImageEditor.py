@@ -19,6 +19,7 @@ class ImageEditor:
 
     def __init__(self):
         self.text_spacer = ' ' * 24
+        self.champlist = Utils.read_champlist_from_file()
 
         self.splash_raw_path = f'./Assets/Splashes_Raw/'
         self.splash_path = f'./Assets/Splashes/'
@@ -31,43 +32,40 @@ class ImageEditor:
 
 
     def init_directories(self):
-        os.makedirs('./Assets/Splashes_Raw/', exist_ok = True)
-        os.makedirs('./Assets/Splashes/', exist_ok = True)
-        os.makedirs('./Assets/Icons_Raw/', exist_ok = True)
-        os.makedirs('./Assets/Icons/', exist_ok = True)
-        os.makedirs('./Assets/Manual_Image_Overrides/', exist_ok = True)
+        os.makedirs(self.splash_raw_path, exist_ok = True)
+        os.makedirs(self.splash_path, exist_ok = True)
+        os.makedirs(self.icon_raw_path, exist_ok = True)
+        os.makedirs(self.icon_path, exist_ok = True)
+        os.makedirs(self.manual_override_path, exist_ok = True)
 
 
     """ IMAGE EDITING """
 
-    def splash_complete_fix(self, champ_name):
-        #  Runs all splash art image editing methods, saves results 
-
+    def optimise_splashes(self, champ_name):
         splash = Image.open(self.splash_raw_path + champ_name + '.bmp')
 
-        splash = self.splash_face_cover(champ_name, splash)
-        splash = self.splash_edit(champ_name, splash)
-        splash = self.scale_splash(champ_name, splash)
+        splash = self.splash_blockout_secondaries(champ_name, splash)
+        splash = self.splash_manual_overrides(champ_name, splash)
+        splash = self.splash_crop(champ_name, splash)
+        splash = self.splash_resize(champ_name, splash)
 
         splash.save(self.splash_path + champ_name + '.bmp')
         splash = ImageOps.mirror(splash)
         splash.save(self.splash_path + champ_name + '_inverted.bmp')
 
 
-    def icon_complete_fix(self, champ_name):
-        #  Runs all icon image editing methods, saves results 
-
+    def optimise_icons(self, champ_name):
         icon = Image.open(self.icon_raw_path + champ_name + '.bmp')
 
         icon = self.icon_manual_override(champ_name, icon)
-        icon = self.scale_icon(champ_name, icon)
+        icon = self.icon_resize(champ_name, icon)
 
         icon.save(self.icon_path + champ_name + '.bmp', 'bmp')
         icon = ImageOps.mirror(icon)
         icon.save(self.icon_path + champ_name + '_inverted.bmp', 'bmp')
 
 
-    def scale_splash(self, champ_name, splash):
+    def splash_resize(self, champ_name, splash):
         if champ_name not in image_scales:
             return splash
 
@@ -86,7 +84,7 @@ class ImageEditor:
         return splash
 
 
-    def splash_face_cover(self, champ_name, splash):
+    def splash_blockout_secondaries(self, champ_name, splash):
         #  Blocks out unwanted champions from dual champion splashes. 
 
         if champ_name == 'Xayah':
@@ -112,7 +110,7 @@ class ImageEditor:
         return splash
 
 
-    def splash_edit(self, champ_name, splash):
+    def splash_manual_overrides(self, champ_name, splash):
         """
         Crops and edits each splash to be recognisable by its crop.
 
@@ -161,12 +159,10 @@ class ImageEditor:
             print(f'{self.text_spacer} - tilting')
             splash = splash.rotate(24)
 
-
-        # Crop
-        return self.crop(champ_name, splash)
+        return splash
 
 
-    def crop(self, champ_name, splash):
+    def splash_crop(self, champ_name, splash):
         if not champ_name in image_scales:
             return splash
         
@@ -185,7 +181,7 @@ class ImageEditor:
         return splash.crop(coords)
 
 
-    def scale_icon(self, champ_name, icon):
+    def icon_resize(self, champ_name, icon):
         if champ_name not in image_scales:
             return icon
 
@@ -234,6 +230,6 @@ class ImageEditor:
 
 
     def check_missing_champions(self):
-        missing = [champ for champ in Utils.get_champlist_as_list() if champ not in image_scales]
+        missing = [champ for champ in Utils.read_champlist_from_file() if champ not in image_scales]
         print('----')
         print(f'\nMissing champion settings: {missing}')

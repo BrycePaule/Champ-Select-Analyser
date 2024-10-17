@@ -1,11 +1,13 @@
 import time
 import datetime
 
+champlist_filepath = './champlist.txt'
+
 
 # Champlist ---------------------------------------------------------------
 
-def get_champlist_as_list():
-    with open('./champlist.txt', 'r') as f:
+def read_champlist_from_file():
+    with open(champlist_filepath, 'r') as f:
         return [name.strip() for name in f]
 
 
