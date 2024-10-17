@@ -5,39 +5,38 @@ import Utils
 
 from AccuracyManager import AccuracyManager
 from TemplateCropper import TemplateCropper
+from collections import namedtuple
+from DRAFT_SLOTS import SLOT_COORDS
+
+
+Match = namedtuple('match', ['champion', 'match_count'])
 
 
 class TemplateMatcher:
 
-    def __init__(self, template_duplicate_count):
+    def __init__(self, attempts):
         self.champlist = Utils.read_champlist_from_file()
-        self.duplicate_count = template_duplicate_count
 
-        self.cropper = TemplateCropper(self.duplicate_count)
-        self.champ_select_slots = [
-            'bb1', 'bb2', 'bb3', 'bb4', 'bb5',
-            'rb1', 'rb2', 'rb3', 'rb4', 'rb5',
-            'b1', 'b2', 'b3', 'b4', 'b5',
-            'r1', 'r2', 'r3', 'r4', 'r5',
-        ]
+        self.attempts = attempts
+        self.ban_accuracy_threshold = 0.70
+        self.pick_accuracy_threshold = 0.90
 
-        self.init_directories()
+        self.cropper = TemplateCropper()
+        self.champ_select_slots = SLOT_COORDS.keys()
 
 
     """ TEMPLATE MATCHING """
 
-    def get_champ_select_image(self, all_templates=False):
-        """
-        Returns the most recent champ select screenshot, or a list of all
-        screenshots in the directory if all_templates=True
-        """
+    def get_draft_screenshot(self, all_templates=False):
+        screenshots = [f for f in os.listdir(Utils.path_draft_screenshots) if f.endswith(".bmp")]
 
         if all_templates:
-            return (f for f in os.listdir(Utils.path_draft_screenshots) if f.endswith(".bmp"))
-        else:
-            return [[f for f in os.listdir(Utils.path_draft_screenshots) if f.endswith(".bmp")][-1]]
+            return screenshots
 
-    def match(self, champ_select_image_number):
+        return screenshots[-1:]
+
+
+    def parse(self, draft_filename):
         """
         Returns a dict of match results:
             slot: (champion name, match counter)
@@ -53,65 +52,63 @@ class TemplateMatcher:
         """
 
         self.clear_stored_results()
-        results = {slot: None for slot in self.champ_select_slots}
+        results = {}
 
         for slot in self.champ_select_slots:
 
             # if bans
             if len(slot) == 3:
-                match_accuracy_threshold = 0.70
+                match_accuracy_threshold = self.ban_accuracy_threshold
                 image_filepath = Utils.path_icons
-
             # if picks
             else:
-                match_accuracy_threshold = 0.93
+                match_accuracy_threshold = self.pick_accuracy_threshold
                 image_filepath = Utils.path_splashes
 
-            for template_number in range(self.duplicate_count * 2 + 1):
-                template = self.cropper.create_template(champ_select_image_number, slot, template_number)
+
+            for i in range(self.attempts * 2 + 1): # *2 for attempted resize up + down, offset to count from 1
+                slot_to_parse = self.cropper.crop_draft_slot(draft_filename, slot, i)
+                match_found = False
+
+                print(f'Parsing [{slot}]: attempt {i + 1}')
 
                 for champion in self.champlist:
-                    print(f'Matching: {slot} (attempt {template_number + 1}) > {champion}')
+                    champ_image_default = cv.imread(f'{image_filepath}{champion}.bmp', 0)
+                    champ_image_invert = cv.imread(f'{image_filepath}{champion}_inverted.bmp', 0)
 
-                    if not os.path.exists(f'{image_filepath}{champion}.bmp'):
-                        raise Exception(f'{champion} does not have a downloaded image.')
+                    count_matches_default = self.template_match(champ_image_default, slot_to_parse, match_accuracy_threshold)
+                    count_matches_invert = self.template_match(champ_image_invert, slot_to_parse, match_accuracy_threshold)
 
-                    champ_image = cv.imread(f'{image_filepath}{champion}.bmp', 0)
-                    matches_default = self.template_match(champ_image, template, match_accuracy_threshold)
-
-                    champ_image_inverted = cv.imread( f'{image_filepath}{champion}_inverted.bmp', 0)
-                    matches_inverted = self.template_match(champ_image_inverted, template, match_accuracy_threshold)
-
-                    best_match = max(matches_default, matches_inverted)
+                    best_match = max(count_matches_default, count_matches_invert)
 
                     if best_match > 0:
-                        print(f'{" " * 20} Match -- {champion} ({best_match})')
-                        results[slot] = (champion, best_match)
+                        results[slot] = Match(champion, best_match)
+                        match_found = True
+
+                        Utils.print_indented(f'Match found -- {champion} ({best_match})')
                         break
 
-                if results[slot] is not None:
+                if match_found:
                     break
 
-            if results[slot] is None:
-                results[slot] = (None, 0)
+            if not match_found:
+                results[slot] = Match(None, 0)
 
         return results
 
-    def template_match(self, champ_image, template_image, match_accuracy_threshold):
-        res = cv.matchTemplate(champ_image, template_image, cv.TM_CCOEFF_NORMED)
 
-        reasonable_matches = np.where(res >= match_accuracy_threshold)
-        matches = np.count_nonzero(reasonable_matches) // 2
-        # this is halved, because it's counting both x and y coords of matches, meaning two non-zeros = one match
+    def template_match(self, champ_to_compare, img_to_parse, accuracy_threshold):
+        # Attempt to match `champ_to_compare` to `img_to_parse` using Template Matching
 
-        return matches
+        results = cv.matchTemplate(champ_to_compare, img_to_parse, cv.TM_CCOEFF_NORMED)
 
+        reasonable_matches = np.where(results >= accuracy_threshold)
+        match_count = np.count_nonzero(reasonable_matches) // 2 # halved as double counting both x and y coords, meaning two non-zeros = one match
 
-    """ MISC """
+        return match_count
+
 
     def clear_stored_results(self):
-        """ Clears results directory of any previous results """
-
         previous_results = [f for f in os.listdir(Utils.path_results) if f.endswith(".bmp")]
 
         for f in previous_results:
@@ -119,27 +116,11 @@ class TemplateMatcher:
 
 
     def update_accuracy(self, results, bans=False):
-        """ Updates TemplateMatcher accuracy trackers. """
-
         accuracy_manager = AccuracyManager()
         accuracy_manager.update_accuracy_file(results, bans)
 
-    def init_directories(self):
-        os.makedirs('./Assets/Splashes/', exist_ok = True)
-        os.makedirs('./Assets/Icons/', exist_ok = True)
-        os.makedirs('champlist.txt', exist_ok = True)
-        os.makedirs('./ChampSelectScreenshots/', exist_ok = True)
-        os.makedirs('./Templates/', exist_ok = True)
-        os.makedirs('./Results/', exist_ok = True)
-        os.makedirs('./Accuracy/accuracy_splash.txt/', exist_ok = True)
-        os.makedirs('./Accuracy/accuracy_icons.txt/', exist_ok = True)
-
-
-    """ OUTPUT """
 
     def print_results(self, results):
-        """ Print results to console. """
-
         bans = list(results.values())[:10]
         bans = [('x', 0) if result[0] is None else result for result in bans]
         bans = zip(bans[:5], bans[5:])
@@ -154,14 +135,14 @@ class TemplateMatcher:
         for row in bans:
             blue_champ, blue_accuracy = row[0][0], row[0][1]
             red_champ, red_accuracy = row[1][0], row[1][1]
-            b_pick = f'{blue_champ.ljust(max_champ_name_len)} {str(blue_accuracy).ljust(2)}'
-            r_pick = f'{str(red_accuracy).ljust(2)}  {red_champ.ljust(max_champ_name_len)}'
+            b_pick = f'{blue_champ.ljust(max_champ_name_len)} {str(blue_accuracy).ljust(3)}'
+            r_pick = f'{str(red_accuracy).ljust(3)}  {red_champ.ljust(max_champ_name_len)}'
             print(f'{b_pick}     |     {r_pick}')
 
         print('\n -----------  Picks  ----------- ')
         for row in picks:
             blue_champ, blue_accuracy = row[0][0], row[0][1]
             red_champ, red_accuracy = row[1][0], row[1][1]
-            b_pick = f'{blue_champ.ljust(max_champ_name_len)} {str(blue_accuracy).ljust(2)}'
-            r_pick = f'{str(red_accuracy).ljust(2)}  {red_champ.ljust(max_champ_name_len)}'
+            b_pick = f'{blue_champ.ljust(max_champ_name_len)} {str(blue_accuracy).ljust(3)}'
+            r_pick = f'{str(red_accuracy).ljust(3)}  {red_champ.ljust(max_champ_name_len)}'
             print(f'{b_pick}     |     {r_pick}')
