@@ -10,18 +10,7 @@ from TemplateCropper import TemplateCropper
 class TemplateMatcher:
 
     def __init__(self, template_duplicate_count):
-        self.champlist_path = Utils.path_champlist
-        self.splash_path = Utils.path_splashes
-        self.icon_path = Utils.path_icons
-
-        self.draft_screenshots_path = Utils.path_draft_screenshots
-        self.template_path = Utils.path_templates
-        self.results_path = Utils.path_results
-
-        self.accuracy_picks_path = Utils.path_pick_accuracy
-        self.accuracy_bans_path = Utils.path_ban_accuracy
-
-        self.champlist = self.import_champlist()
+        self.champlist = Utils.read_champlist_from_file()
         self.duplicate_count = template_duplicate_count
 
         self.cropper = TemplateCropper(self.duplicate_count)
@@ -39,17 +28,14 @@ class TemplateMatcher:
 
     def get_champ_select_image(self, all_templates=False):
         """
-        Returns the latest champ select screenshot, or a list of all
-        screenshots in the directory if all=True
+        Returns the most recent champ select screenshot, or a list of all
+        screenshots in the directory if all_templates=True
         """
 
-        if (not os.path.exists(self.draft_screenshots_path)):
-            os.mkdir(self.draft_screenshots_path)
-
         if all_templates:
-            return (f for f in os.listdir(self.draft_screenshots_path) if f.endswith(".bmp"))
+            return (f for f in os.listdir(Utils.path_draft_screenshots) if f.endswith(".bmp"))
         else:
-            return [[f for f in os.listdir(self.draft_screenshots_path) if f.endswith(".bmp")][-1]]
+            return [[f for f in os.listdir(Utils.path_draft_screenshots) if f.endswith(".bmp")][-1]]
 
     def match(self, champ_select_image_number):
         """
@@ -74,12 +60,12 @@ class TemplateMatcher:
             # if bans
             if len(slot) == 3:
                 match_accuracy_threshold = 0.70
-                image_filepath = self.icon_path
+                image_filepath = Utils.path_icons
 
             # if picks
             else:
                 match_accuracy_threshold = 0.93
-                image_filepath = self.splash_path
+                image_filepath = Utils.path_splashes
 
             for template_number in range(self.duplicate_count * 2 + 1):
                 template = self.cropper.create_template(champ_select_image_number, slot, template_number)
@@ -126,10 +112,10 @@ class TemplateMatcher:
     def clear_stored_results(self):
         """ Clears results directory of any previous results """
 
-        previous_results = [f for f in os.listdir(self.results_path) if f.endswith(".bmp")]
+        previous_results = [f for f in os.listdir(Utils.path_results) if f.endswith(".bmp")]
 
         for f in previous_results:
-            os.remove(os.path.join(self.results_path, f))
+            os.remove(os.path.join(Utils.path_results, f))
 
 
     def update_accuracy(self, results, bans=False):
@@ -179,12 +165,3 @@ class TemplateMatcher:
             b_pick = f'{blue_champ.ljust(max_champ_name_len)} {str(blue_accuracy).ljust(2)}'
             r_pick = f'{str(red_accuracy).ljust(2)}  {red_champ.ljust(max_champ_name_len)}'
             print(f'{b_pick}     |     {r_pick}')
-
-
-    """ CHAMPLIST """
-
-    def import_champlist(self):
-        """ Imports champlist from file. """
-
-        with open(self.champlist_path, 'r') as f:
-            return [name.strip() for name in f]

@@ -10,10 +10,7 @@ class AccuracyManager:
     """
 
     def __init__(self):
-        self.accuracy_filepath_picks = Utils.path_pick_accuracy
-        self.accuracy_filepath_bans = Utils.path_ban_accuracy
-
-        self.champlist = self.import_champlist()
+        self.champlist = Utils.read_champlist_from_file()
 
         self.low_accuracy_threshold_picks = 10
         self.low_accuracy_threshold_bans = 10
@@ -30,14 +27,14 @@ class AccuracyManager:
         """
 
         if bans:
-            accuracy_filepath = self.accuracy_filepath_bans
+            file = Utils.path_ban_accuracy
         else:
-            accuracy_filepath = self.accuracy_filepath_picks
+            file = Utils.path_pick_accuracy
 
-        if not os.path.isfile(accuracy_filepath):
+        if not os.path.isfile(file):
             self.create_default_accuracy_file(bans=bans)
 
-        with open(accuracy_filepath, 'r') as f:
+        with open(file, 'r') as f:
             stored_accuracy = {champ_name: int(accuracy) for (champ_name, accuracy) in [line.strip().split(' ') for line in f]}
 
         for _, champ_name, match_accuracy in match_results:
@@ -46,7 +43,7 @@ class AccuracyManager:
             if stored_accuracy[champ_name] < match_accuracy:
                 stored_accuracy[champ_name] = match_accuracy
 
-        with open(accuracy_filepath, 'w') as f:
+        with open(file, 'w') as f:
             for champ_name, accuracy in stored_accuracy.items():
                 f.write(f'{champ_name} {accuracy}\n')
 
@@ -55,9 +52,9 @@ class AccuracyManager:
         #  Creates a default accuracy file 
 
         if bans:
-            accuracy_filepath = self.accuracy_filepath_bans
+            accuracy_filepath = Utils.path_ban_accuracy
         else:
-            accuracy_filepath = self.accuracy_filepath_picks
+            accuracy_filepath = Utils.path_pick_accuracy
 
         with open(accuracy_filepath, 'w') as f:
             for name in self.champlist:
@@ -68,9 +65,9 @@ class AccuracyManager:
         #  Prints a list of champs with unknown accuracy to console.  
 
         if bans:
-            accuracy_filepath = self.accuracy_filepath_bans
+            accuracy_filepath = Utils.path_ban_accuracy
         else:
-            accuracy_filepath = self.accuracy_filepath_picks
+            accuracy_filepath = Utils.path_pick_accuracy
 
         with open(accuracy_filepath, 'r') as f:
             unknowns = []
@@ -91,10 +88,10 @@ class AccuracyManager:
         #  Prints a list of champs with low accuracy to console.  
 
         if bans:
-            accuracy_filepath = self.accuracy_filepath_bans
+            accuracy_filepath = Utils.path_ban_accuracy
             threshold = self.low_accuracy_threshold_bans
         else:
-            accuracy_filepath = self.accuracy_filepath_picks
+            accuracy_filepath = Utils.path_pick_accuracy
             threshold = self.low_accuracy_threshold_picks
 
         with open(accuracy_filepath, 'r') as f:

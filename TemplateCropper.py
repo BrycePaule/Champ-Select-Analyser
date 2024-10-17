@@ -11,8 +11,6 @@ class TemplateCropper:
     """ Handles cutting template crops from champ select screenshots """
 
     def __init__(self, template_duplicate_count):
-        self.champ_select_path = Utils.path_champlist
-
         self.duplicate_count = template_duplicate_count
         self.resize_factor = 0.01
 
@@ -26,7 +24,7 @@ class TemplateCropper:
     """ TEMPLATE CREATION """
 
     def create_template(self, champ_select_image, slot, template_number, resize_factor=0.01, bans=False):
-        template_PIL = Image.open(f'{self.champ_select_path}{champ_select_image}')
+        template_PIL = Image.open(f'{Utils.path_champlist}{champ_select_image}')
         template_PIL = template_PIL.crop(self.slot_coords[slot])
 
         if template_number == 0:

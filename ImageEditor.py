@@ -18,51 +18,35 @@ class ImageEditor:
     """
 
     def __init__(self):
-        self.text_spacer = ' ' * 24
         self.champlist = Utils.read_champlist_from_file()
 
-        self.splash_raw_path = Utils.path_splashes_raw
-        self.splash_path = Utils.path_splashes
-        self.icon_raw_path = Utils.path_icons_raw
-        self.icon_path = Utils.path_icons
-        self.manual_override_path = Utils.path_manual_image_overrides
-
         self.check_missing_champions()
-        self.init_directories()
-
-
-    def init_directories(self):
-        os.makedirs(self.splash_raw_path, exist_ok = True)
-        os.makedirs(self.splash_path, exist_ok = True)
-        os.makedirs(self.icon_raw_path, exist_ok = True)
-        os.makedirs(self.icon_path, exist_ok = True)
-        os.makedirs(self.manual_override_path, exist_ok = True)
 
 
     """ IMAGE EDITING """
 
     def optimise_splashes(self, champ_name):
-        splash = Image.open(self.splash_raw_path + champ_name + '.bmp')
+        splash = Image.open(f'{Utils.path_splashes_raw}{champ_name}.bmp')
 
         splash = self.splash_blockout_secondaries(champ_name, splash)
         splash = self.splash_manual_overrides(champ_name, splash)
         splash = self.splash_crop(champ_name, splash)
         splash = self.splash_resize(champ_name, splash)
 
-        splash.save(self.splash_path + champ_name + '.bmp')
+        splash.save(f'{Utils.path_splashes}{champ_name}.bmp')
         splash = ImageOps.mirror(splash)
-        splash.save(self.splash_path + champ_name + '_inverted.bmp')
+        splash.save(f'{Utils.path_splashes}{champ_name}_inverted.bmp')
 
 
     def optimise_icons(self, champ_name):
-        icon = Image.open(self.icon_raw_path + champ_name + '.bmp')
+        icon = Image.open(f'{Utils.path_icons_raw}{champ_name}.bmp')
 
         icon = self.icon_manual_override(champ_name, icon)
         icon = self.icon_resize(champ_name, icon)
 
-        icon.save(self.icon_path + champ_name + '.bmp', 'bmp')
+        icon.save(f'{Utils.path_icons}{champ_name}.bmp')
         icon = ImageOps.mirror(icon)
-        icon.save(self.icon_path + champ_name + '_inverted.bmp', 'bmp')
+        icon.save(f'{Utils.path_icons}{champ_name}_inverted.bmp')
 
 
     def splash_resize(self, champ_name, splash):
@@ -74,7 +58,7 @@ class ImageEditor:
         if scale_factor == 1.00:
             return splash
 
-        print(f'{self.text_spacer} - scaling splash')
+        Utils.print_indented(' - scaling splash')
 
         w, h = splash.size
         w = round(w * scale_factor)
@@ -88,22 +72,22 @@ class ImageEditor:
         #  Blocks out unwanted champions from dual champion splashes. 
 
         if champ_name == 'Xayah':
-            print(f'{self.text_spacer} - blocking out Rakan')
+            Utils.print_indented(' - blocking out Rakan')
             draw = ImageDraw.Draw(splash)
             draw.rectangle([(400, 20), (600, 200)], 'black')
 
         elif champ_name == 'Rakan':
-            print(f'{self.text_spacer} - blocking out Xayah')
+            Utils.print_indented(' - blocking out Xayah')
             draw = ImageDraw.Draw(splash)
             draw.rectangle([(300, 120), (500, 300)], 'black')
 
         elif champ_name == 'Kayle':
-            print(f'{self.text_spacer} - blocking out Morgana')
+            Utils.print_indented(' - blocking out Morgana')
             draw = ImageDraw.Draw(splash)
             draw.rectangle([(200, 120), (500, 300)], 'black')
 
         elif champ_name == 'Morgana':
-            print(f'{self.text_spacer} - blocking out Kayle')
+            Utils.print_indented(' - blocking out Kayle')
             draw = ImageDraw.Draw(splash)
             draw.rectangle([(200, 120), (500, 300)], 'black')
 
@@ -121,42 +105,42 @@ class ImageEditor:
 
         # Manual overrides, rotations and misc transformations
         if champ_name == 'Camille':
-            print(f'{self.text_spacer} - tilting')
+            Utils.print_indented(' - tilting')
             splash = splash.rotate(2)
 
         elif champ_name == 'Corki':
-            print(f'{self.text_spacer} - tilting')
+            Utils.print_indented(' - tilting')
             w, h = splash.size
             splash = splash.resize((int(w * 0.98), int(h * 1.05)))
 
         elif champ_name == 'Ezreal':
-            print(f'{self.text_spacer} - oldifying')
-            splash = Image.open(f'{self.manual_override_path}Ezreal_old.jpg').convert('RGB')
+            Utils.print_indented(' - oldifying')
+            splash = Image.open(f'{Utils.path_manual_image_overrides}Ezreal_old.jpg').convert('RGB')
 
         elif champ_name == 'Galio':
-            print(f'{self.text_spacer} - darkening')
-            splash = Image.open(f'{self.manual_override_path}Galio_gradient2.bmp').convert('RGB')
+            Utils.print_indented(' - darkening')
+            splash = Image.open(f'{Utils.path_manual_image_overrides}Galio_gradient2.bmp').convert('RGB')
 
         elif champ_name == 'Orianna':
-            print(f'{self.text_spacer} - tilting')
+            Utils.print_indented(' - tilting')
             splash = ImageChops.offset(splash, 0, 100)
             splash = splash.rotate(9)
 
         elif champ_name == 'Ornn':
-            print(f'{self.text_spacer} - darkening')
+            Utils.print_indented(' - darkening')
             splash = ImageEnhance.Brightness(splash)
             splash = splash.enhance(0.90)
-            print(f'{self.text_spacer} - blurring')
+            Utils.print_indented(' - blurring')
             splash = ImageEnhance.Sharpness(splash)
             splash = splash.enhance(0.00)
 
         elif champ_name == 'Pyke':
-            print(f'{self.text_spacer} - darkening')
+            Utils.print_indented(' - darkening')
             splash = ImageEnhance.Sharpness(splash)
             splash = splash.enhance(0.00)
 
         elif champ_name == 'Ryze':
-            print(f'{self.text_spacer} - tilting')
+            Utils.print_indented(' - tilting')
             splash = splash.rotate(24)
 
         return splash
@@ -169,7 +153,7 @@ class ImageEditor:
         if not image_scales[champ_name].crop != None:
             return splash
         
-        print(f'{self.text_spacer} - cropping splash')
+        Utils.print_indented(' - cropping splash')
 
         coords = image_scales[champ_name].crop
         if (coords[2] == 'w'):
@@ -190,7 +174,7 @@ class ImageEditor:
         if scale_factor == 1.00:
             return icon
 
-        print(f'{self.text_spacer} - scaling icon')
+        Utils.print_indented(' - scaling icon')
 
         w, h = icon.size
         w = round(w * scale_factor)
@@ -207,24 +191,24 @@ class ImageEditor:
         """
 
         if champ_name == 'Akali':
-            print(f'{self.text_spacer} - finding icon')
-            icon = Image.open(f'{self.manual_override_path}Akali_icon.bmp')
+            Utils.print_indented(' - finding icon')
+            icon = Image.open(f'{Utils.path_manual_image_overrides}Akali_icon.bmp')
 
         elif champ_name == 'Aphelios':
-            print(f'{self.text_spacer} - finding icon')
-            icon = Image.open(f'{self.manual_override_path}Aphelios_icon.bmp')
+            Utils.print_indented(' - finding icon')
+            icon = Image.open(f'{Utils.path_manual_image_overrides}Aphelios_icon.bmp')
 
         elif champ_name == 'Mordekaiser':
-            print(f'{self.text_spacer} - finding icon')
-            icon = Image.open(f'{self.manual_override_path}Mordekaiser_icon.bmp')
+            Utils.print_indented(' - finding icon')
+            icon = Image.open(f'{Utils.path_manual_image_overrides}Mordekaiser_icon.bmp')
 
         elif champ_name == 'Pyke':
-            print(f'{self.text_spacer} - finding icon')
-            icon = Image.open(f'{self.manual_override_path}Pyke_icon.bmp')
+            Utils.print_indented(' - finding icon')
+            icon = Image.open(f'{Utils.path_manual_image_overrides}Pyke_icon.bmp')
 
         elif champ_name == 'Rakan':
-            print(f'{self.text_spacer} - finding icon')
-            icon = Image.open(f'{self.manual_override_path}Rakan_icon.bmp')
+            Utils.print_indented(' - finding icon')
+            icon = Image.open(f'{Utils.path_manual_image_overrides}Rakan_icon.bmp')
 
         return icon
 

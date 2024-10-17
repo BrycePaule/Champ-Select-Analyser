@@ -45,3 +45,9 @@ def end_timer(time_start):
     print('\n-----------------------')
     print(f'Runtime: {elapsed_time}')
     print('-----------------------')
+
+
+# Output
+
+def print_indented(text):
+    print(f'{' ' * 24}{text}')

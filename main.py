@@ -1,3 +1,4 @@
+import os
 import sys
 import Utils
 
@@ -86,6 +87,19 @@ def run():
 
     # TEMP TESTING -------------------------------------
     # TEMP TESTING -------------------------------------
+
+
+    # Create required directories
+    os.makedirs(Utils.path_splashes, exist_ok=True)
+    os.makedirs(Utils.path_splashes_raw, exist_ok=True)
+    os.makedirs(Utils.path_icons, exist_ok=True)
+    os.makedirs(Utils.path_icons_raw, exist_ok=True)
+
+    os.makedirs(Utils.path_manual_image_overrides, exist_ok=True)
+
+    os.makedirs(Utils.path_draft_screenshots, exist_ok=True)
+    os.makedirs(Utils.path_templates, exist_ok=True)
+    os.makedirs(Utils.path_results, exist_ok=True)
 
 
     # Run app
