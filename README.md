@@ -1,23 +1,36 @@
 # Champ-Select-Analyser
 
-Champ-Select-Analyser is a command line tool used to turn LCK Champion select screenshots into digestable draft tables with respect to pick and ban order.
+A command line tool (CLI) designed to parse LCK champion select / draft screenshots into human-readable draft tables.
 
-<br>
+i.e. converts this:
 
-Major uses:
-- Web scraping and updating most recent champion list + champion splash arts
-- Slightly edits and optmises the raw splashes to be more usable, both for accuracy and speed
-- Template matching champ selects against those criteria for data collection
+<img src='READMEImages\DraftMarkup.jpg' height=200> 
 
-<br>
+into this:
 
-<b> Usage: </b> 
-<br>
-Default usage (no arguments) runs all 3 major functions (scrape, edit and match)
+<img src='READMEImages\OutputExample.jpg' height=200>
 
-`-d` or `-download` downloads champlist + splash arts <br>
-`-e` or `-edit` edits splashes for usability <br>
-`-nm` or `-nomatch` omits template matching (just downloads champlist and/or edits splashes) <br>
-`-a` or `-all` allows matching of multiple champselects (all in given directory) as opposed to a single screenshot <br>
 
-You will be prompted to provide google sheet information on launch, if left blank it will still run without trying to output results externally, only to stdout.
+## Functionality
+- Web scraper that:
+    1. Scrapes the current `champion list` (i.e. automatically handles new champion releases)
+    2. Scrapes champion `splash arts` and `icons` to match against broadcast graphics
+- Transforms scraped images to optimise for match time
+- Parses draft screenshots and outputs to either `console` or a `google sheets`
+
+
+## Usage:
+
+Default usage `python ./main.py`:
+- Will not run the scraper
+- Will not edit local splash art or icons
+- Will run the parser over the latest (by timestamp) screenshot in the directory
+
+
+| Argument | Description |
+| ------------- | ------------- |
+| `-s` or `-scrape`  | - Runs the web scraper for champion names, splashes, and icons <br> - Only downloads missing data  |
+| `-fs` or `-force_scrape`  | - Force run the scraper for champion names, splash arts and icons <br> - Overrides all local data |
+| `-o` or `-optimise`  | - Edits scraped images to improve parse speed and accuracy |
+| `-np` or `-no_parse`  | - Does not run the parser |
+| `-a` or `-all`  | - Parses all screenshots in the directory, rather than the latest |
