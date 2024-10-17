@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import cv2 as cv
+import Utils
 
 from AccuracyManager import AccuracyManager
 from TemplateCropper import TemplateCropper
@@ -9,16 +10,16 @@ from TemplateCropper import TemplateCropper
 class TemplateMatcher:
 
     def __init__(self, template_duplicate_count):
-        self.splash_path = f'./Assets/Splashes/'
-        self.icon_path = f'./Assets/Icons/'
+        self.champlist_path = Utils.path_champlist
+        self.splash_path = Utils.path_splashes
+        self.icon_path = Utils.path_icons
 
-        self.champlist_path = f'champlist.txt'
-        self.champ_select_path = f'./ChampSelectScreenshots/'
-        self.template_path = f'./Templates/'
-        self.results_path = f'./Results/'
+        self.draft_screenshots_path = Utils.path_draft_screenshots
+        self.template_path = Utils.path_templates
+        self.results_path = Utils.path_results
 
-        self.accuracy_filepath_picks = f'./Accuracy/accuracy_splash.txt/'
-        self.accuracy_filepath_bans = f'./Accuracy/accuracy_icons.txt/'
+        self.accuracy_picks_path = Utils.path_pick_accuracy
+        self.accuracy_bans_path = Utils.path_ban_accuracy
 
         self.champlist = self.import_champlist()
         self.duplicate_count = template_duplicate_count
@@ -42,13 +43,13 @@ class TemplateMatcher:
         screenshots in the directory if all=True
         """
 
-        if (not os.path.exists(self.champ_select_path)):
-            os.mkdir(self.champ_select_path)
+        if (not os.path.exists(self.draft_screenshots_path)):
+            os.mkdir(self.draft_screenshots_path)
 
         if all_templates:
-            return (f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp"))
+            return (f for f in os.listdir(self.draft_screenshots_path) if f.endswith(".bmp"))
         else:
-            return [[f for f in os.listdir(self.champ_select_path) if f.endswith(".bmp")][-1]]
+            return [[f for f in os.listdir(self.draft_screenshots_path) if f.endswith(".bmp")][-1]]
 
     def match(self, champ_select_image_number):
         """

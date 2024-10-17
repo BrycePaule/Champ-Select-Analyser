@@ -1,4 +1,5 @@
 import os
+import Utils
 
 class AccuracyManager:
 
@@ -9,8 +10,8 @@ class AccuracyManager:
     """
 
     def __init__(self):
-        self.accuracy_filepath_picks = f'./Accuracy/accuracy_splash.txt/'
-        self.accuracy_filepath_bans = f'./Accuracy/accuracy_icons.txt/'
+        self.accuracy_filepath_picks = Utils.path_pick_accuracy
+        self.accuracy_filepath_bans = Utils.path_ban_accuracy
 
         self.champlist = self.import_champlist()
 

@@ -21,11 +21,11 @@ class ImageEditor:
         self.text_spacer = ' ' * 24
         self.champlist = Utils.read_champlist_from_file()
 
-        self.splash_raw_path = f'./Assets/Splashes_Raw/'
-        self.splash_path = f'./Assets/Splashes/'
-        self.icon_raw_path = f'./Assets/Icons_Raw/'
-        self.icon_path = f'./Assets/Icons/'
-        self.manual_override_path = f'./Assets/Manual_Image_Overrides/'
+        self.splash_raw_path = Utils.path_splashes_raw
+        self.splash_path = Utils.path_splashes
+        self.icon_raw_path = Utils.path_icons_raw
+        self.icon_path = Utils.path_icons
+        self.manual_override_path = Utils.path_manual_image_overrides
 
         self.check_missing_champions()
         self.init_directories()

@@ -28,18 +28,16 @@ def optimise_scraped_images():
         editor.optimise_icons(name)
 
 def run_crop_and_match(duplicate_count=3, match_all=False):
-    spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ')
-    if spreadsheet_URL.isspace() or spreadsheet_URL == '':
-        spreadsheet_URL = None
 
-    worksheet_name = input('Enter worksheet name (enter to skip): ')
-    if worksheet_name.isspace() or worksheet_name == '':
-        worksheet_name = None
+    # Remote save info
+    spreadsheet_URL = input('Enter spreadsheet URL (enter to skip): ').strip()
+    worksheet_name = input('Enter worksheet name (enter to skip): ').strip()
 
+    # Run image parser
     matcher = TemplateMatcher(duplicate_count)
 
     for image in matcher.get_champ_select_image(match_all):
-        print(f'Working on {image}')
+        print(f'Matching {image}')
         results = matcher.match(image)
         matcher.print_results(results)
 
@@ -83,7 +81,7 @@ def run():
     # TEMP TESTING -------------------------------------
 
     _run_scraper = True
-    _force_scrape = True
+    # _force_scrape = True
     _optimise_scraped_images = True
 
     # TEMP TESTING -------------------------------------

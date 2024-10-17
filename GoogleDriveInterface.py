@@ -1,4 +1,5 @@
 import gspread
+import Utils
 
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -8,7 +9,7 @@ class GoogleDriveInterface:
     """ Handles sending TemplateMatcher results to the given google sheet """
 
     def __init__(self, google_sheet_url, worksheet):
-        self.credential_file = 'GoogleAuthentication/CSA_secrets_GSuite.json'
+        self.credential_file = Utils.path_auth
         self.scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
         self.creds = ServiceAccountCredentials.from_json_keyfile_name(self.credential_file, self.scope)
 

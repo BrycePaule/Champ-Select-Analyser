@@ -1,13 +1,34 @@
 import time
 import datetime
 
-champlist_filepath = './champlist.txt'
+# Files -------------------------------------------------------------------
+
+path_champlist = './champlist.txt'
+
+path_pick_accuracy = './Accuracy/accuracy_splash.txt'
+path_ban_accuracy = './Accuracy/accuracy_icons.txt'
+
+path_auth = './GoogleAuthentication/CSA_secrets_GSuite.json'
+
+
+# Directories -------------------------------------------------------------
+
+path_splashes = './Assets/Splashes/'
+path_splashes_raw = './Assets/Splashes_Raw/'
+path_icons = './Assets/Icons/'
+path_icons_raw = './Assets/Icons_Raw/'
+path_manual_image_overrides = './Assets/Manual_Image_Overrides/'
+
+path_draft_screenshots = './ChampSelectScreenshots/'
+
+path_templates = './Templates/'
+path_results = './Results/'
 
 
 # Champlist ---------------------------------------------------------------
 
 def read_champlist_from_file():
-    with open(champlist_filepath, 'r') as f:
+    with open(path_champlist, 'r') as f:
         return [name.strip() for name in f]
 
 

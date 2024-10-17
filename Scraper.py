@@ -15,7 +15,7 @@ class Scraper:
     """
 
     def __init__(self):
-        self.champlist_path = Utils.champlist_filepath
+        self.champlist_path = Utils.path_champlist
         self.champlist = []
 
         self.init_directories()

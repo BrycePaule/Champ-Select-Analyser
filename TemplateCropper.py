@@ -1,4 +1,5 @@
 import os
+import Utils
 
 from PIL import Image
 import numpy as np
@@ -10,7 +11,7 @@ class TemplateCropper:
     """ Handles cutting template crops from champ select screenshots """
 
     def __init__(self, template_duplicate_count):
-        self.champ_select_path = f'./ChampSelectScreenshots/'
+        self.champ_select_path = Utils.path_champlist
 
         self.duplicate_count = template_duplicate_count
         self.resize_factor = 0.01
