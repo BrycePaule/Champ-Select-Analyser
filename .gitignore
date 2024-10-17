@@ -139,4 +139,4 @@ dmypy.json
 !Manual_Image_Overrides/*.bmp
 !Manual_Image_Overrides/*.png
 !Manual_Image_Overrides/*.jpg
-!READMEImages/*.jpg
+!ReadMe/*.jpg
